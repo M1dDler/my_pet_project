@@ -3,6 +3,7 @@ package io.github.m1ddler.my_pet_project.service;
 import io.github.m1ddler.my_pet_project.dao.UserRepository;
 import io.github.m1ddler.my_pet_project.dto.UserDTO;
 import io.github.m1ddler.my_pet_project.entity.User;
+import io.github.m1ddler.my_pet_project.exception_handling.EmailAlreadyExistsException;
 import jakarta.persistence.EntityNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -37,6 +38,9 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public UserDTO saveUser(UserDTO userdto) {
+        if (userRepository.existsUserByEmail(userdto.getEmail())){
+            throw new EmailAlreadyExistsException("Email already exists");
+        }
         User user = new User(userdto.getUserName(), userdto.getEmail(), userdto.getPortfolios());
         User savedUser = userRepository.save(user);
         return new UserDTO(
@@ -55,7 +59,7 @@ public class UserServiceImpl implements UserService {
         if (!existingUser.getEmail().equals(updatedUserDTO.getEmail())) {
             Optional<User> userWithEmail = userRepository.findByEmail(updatedUserDTO.getEmail());
             if (userWithEmail.isPresent() && userWithEmail.get().getId() != userId) {
-                throw new IllegalArgumentException("Email already in use");
+                throw new EmailAlreadyExistsException("Email already exists");
             }
             existingUser.setEmail(updatedUserDTO.getEmail());
         }
