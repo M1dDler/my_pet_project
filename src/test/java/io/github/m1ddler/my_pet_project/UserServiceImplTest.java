@@ -10,13 +10,13 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
 import java.util.Optional;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -26,7 +26,6 @@ public class UserServiceImplTest {
     private UserRepository userRepository;
     private UserServiceImpl userService;
     private AutoCloseable closeable;
-
 
     @BeforeEach
     void setup() {
@@ -41,20 +40,28 @@ public class UserServiceImplTest {
 
     @Test
     void getAllUsers_shouldReturnListOfUserDTOs() {
-        List<User> users = List.of(new User("John", "john@example.com", List.of()));
-        users.get(0).setId(1);
-        when(userRepository.findAll()).thenReturn(users);
-        List<UserDTO> result = userService.getAllUsers();
+        User user = new User("John", "john@example.com");
+        user.setId(1);
+        when(userRepository.findAll()).thenReturn(List.of(user));
+
+        ResponseEntity<List<UserDTO>> response = userService.getAllUsers();
+        List<UserDTO> result = response.getBody();
+
+        assertNotNull(result);
         assertEquals(1, result.size());
         assertEquals("John", result.get(0).getUserName());
     }
 
     @Test
     void getUserById_whenUserExists_shouldReturnUserDTO() {
-        User user = new User("Alice", "alice@example.com", List.of());
+        User user = new User("Alice", "alice@example.com");
         user.setId(2);
         when(userRepository.findById(2)).thenReturn(Optional.of(user));
-        UserDTO dto = userService.getUserById(2);
+
+        ResponseEntity<UserDTO> response = userService.getUserById(2);
+        UserDTO dto = response.getBody();
+
+        assertNotNull(dto);
         assertEquals("Alice", dto.getUserName());
     }
 
@@ -67,11 +74,16 @@ public class UserServiceImplTest {
     @Test
     void saveUser_whenEmailNotExists_shouldSaveAndReturnDTO() {
         UserDTO dto = new UserDTO(0, "Bob", "bob@example.com", List.of());
-        User saved = new User("Bob", "bob@example.com", List.of());
+        User saved = new User("Bob", "bob@example.com");
         saved.setId(10);
+
         when(userRepository.existsUserByEmail("bob@example.com")).thenReturn(false);
         when(userRepository.save(any(User.class))).thenReturn(saved);
-        UserDTO result = userService.saveUser(dto);
+
+        ResponseEntity<UserDTO> response = userService.saveUser(dto);
+        UserDTO result = response.getBody();
+
+        assertNotNull(result);
         assertEquals(10, result.getId());
         verify(userRepository).save(any(User.class));
     }

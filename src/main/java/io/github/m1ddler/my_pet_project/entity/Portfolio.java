@@ -1,9 +1,11 @@
 package io.github.m1ddler.my_pet_project.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 
 import java.math.BigDecimal;
 import java.util.List;
+import java.util.Objects;
 
 @Entity
 @Table(name = "portfolios")
@@ -11,18 +13,24 @@ public class Portfolio {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id")
-    private int portfolioId;
+    private int id;
     @Column(name = "name")
     private String name;
     @Column(name = "total_value")
     private BigDecimal totalValue;
+    @JsonIgnore
     @ManyToOne
     @JoinColumn(name = "user_id")
     private User user;
-    @OneToMany(mappedBy = "portfolio")
+    @OneToMany(mappedBy = "portfolio", fetch = FetchType.EAGER, cascade = CascadeType.REMOVE, orphanRemoval = true)
     private List<Transaction> transactions;
 
     public Portfolio() {}
+
+    public Portfolio(String name, User user) {
+        this.name = name;
+        this.user = user;
+    }
 
     public List<Transaction> getTransactions() {
         return transactions;
@@ -56,18 +64,18 @@ public class Portfolio {
         this.totalValue = totalValue;
     }
 
-    public int getPortfolioId() {
-        return portfolioId;
+    public int getId() {
+        return id;
     }
 
-    public void setPortfolioId(int portfolioId) {
-        this.portfolioId = portfolioId;
+    public void setId(int id) {
+        this.id = id;
     }
 
     @Override
     public String toString() {
         return "Portfolio:\n"+
-                "[Id="+portfolioId+",\n" +
+                "[Id="+ id +",\n" +
                 "name="+name+",\n" +
                 "totalValue="+totalValue+"]\n";
     }

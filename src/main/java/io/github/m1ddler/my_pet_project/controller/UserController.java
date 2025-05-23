@@ -3,6 +3,7 @@ package io.github.m1ddler.my_pet_project.controller;
 import io.github.m1ddler.my_pet_project.dto.UserDTO;
 import io.github.m1ddler.my_pet_project.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -18,22 +19,22 @@ public class UserController {
     }
 
     @GetMapping("/users")
-    public List<UserDTO> getAllUsers() {
+    public ResponseEntity<List<UserDTO>> getAllUsers() {
         return userService.getAllUsers();
     }
 
     @GetMapping("/users/{userId}")
-    public UserDTO getUserById(@PathVariable int userId) {
+    public ResponseEntity<UserDTO> getUserById(@PathVariable int userId) {
         return userService.getUserById(userId);
     }
 
     @PostMapping("/users")
-    public UserDTO createUser(@RequestBody UserDTO userdto) {
+    public ResponseEntity<UserDTO> createUser(@RequestBody UserDTO userdto) {
         return userService.saveUser(userdto);
     }
 
     @PutMapping("/users/{userId}")
-    public UserDTO updateUser(@PathVariable int userId, @RequestBody UserDTO userdto) {
+    public ResponseEntity<UserDTO> updateUser(@PathVariable int userId, @RequestBody UserDTO userdto) {
         return userService.updateUser(userId, userdto);
     }
 

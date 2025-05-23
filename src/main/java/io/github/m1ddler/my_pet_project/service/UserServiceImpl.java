@@ -4,9 +4,9 @@ import io.github.m1ddler.my_pet_project.dao.UserRepository;
 import io.github.m1ddler.my_pet_project.dto.UserDTO;
 import io.github.m1ddler.my_pet_project.entity.User;
 import io.github.m1ddler.my_pet_project.exception_handling.EmailAlreadyExistsException;
-import jakarta.persistence.EntityNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
@@ -23,38 +23,40 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public List<UserDTO> getAllUsers() {
-        return userRepository.findAll().stream()
+    public ResponseEntity<List<UserDTO>> getAllUsers() {
+        return ResponseEntity.status(HttpStatus.OK).body(userRepository.findAll().stream()
                 .map(u-> new UserDTO(u.getId(), u.getUserName(), u.getEmail(), u.getPortfolios()))
-                .toList();
+                .toList());
     }
 
     @Override
-    public UserDTO getUserById(int userId) {
-        return userRepository.findById(userId)
+    public ResponseEntity<UserDTO> getUserById(int userId) {
+        return ResponseEntity.status(HttpStatus.OK).body(userRepository.findById(userId)
                 .map(u-> new UserDTO(u.getId(), u.getUserName(), u.getEmail(), u.getPortfolios()))
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User with ID "+userId+" not found"));
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND)));
     }
 
     @Override
-    public UserDTO saveUser(UserDTO userdto) {
-        if (userRepository.existsUserByEmail(userdto.getEmail())){
+    public ResponseEntity<UserDTO> saveUser(UserDTO userDTO) {
+        if (userRepository.existsUserByEmail(userDTO.getEmail())){
             throw new EmailAlreadyExistsException("Email already exists");
         }
-        User user = new User(userdto.getUserName(), userdto.getEmail(), userdto.getPortfolios());
+        User user = new User(userDTO.getUserName(), userDTO.getEmail());
         User savedUser = userRepository.save(user);
-        return new UserDTO(
+        return ResponseEntity.status(HttpStatus.OK).body(new UserDTO(
                 savedUser.getId(),
                 savedUser.getUserName(),
                 savedUser.getEmail(),
                 savedUser.getPortfolios()
-        );
+        ));
     }
 
     @Override
-    public UserDTO updateUser(int userId, UserDTO updatedUserDTO) {
+    public ResponseEntity<UserDTO> updateUser(int userId, UserDTO updatedUserDTO) {
+        boolean changed = false;
+
         User existingUser = userRepository.findById(userId)
-                .orElseThrow(() -> new EntityNotFoundException("User not found"));
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
 
         if (!existingUser.getEmail().equals(updatedUserDTO.getEmail())) {
             Optional<User> userWithEmail = userRepository.findByEmail(updatedUserDTO.getEmail());
@@ -62,28 +64,32 @@ public class UserServiceImpl implements UserService {
                 throw new EmailAlreadyExistsException("Email already exists");
             }
             existingUser.setEmail(updatedUserDTO.getEmail());
+            changed = true;
         }
 
-        existingUser.setUserName(updatedUserDTO.getUserName());
+        if (!existingUser.getUserName().equals(updatedUserDTO.getUserName())) {
+            existingUser.setUserName(updatedUserDTO.getUserName());
+            changed = true;
+        }
 
-        User savedUser = userRepository.save(existingUser);
-
-        return new UserDTO(
-                savedUser.getId(),
-                savedUser.getUserName(),
-                savedUser.getEmail(),
-                savedUser.getPortfolios()
-        );
+        if(changed) {
+            User savedUser = userRepository.save(existingUser);
+            return ResponseEntity.status(HttpStatus.OK).body(new UserDTO(
+                    savedUser.getId(),
+                    savedUser.getUserName(),
+                    savedUser.getEmail(),
+                    savedUser.getPortfolios()
+            ));
+        }
+        else{
+            return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
+        }
     }
-
 
     @Override
     public void deleteUser(int userId) {
         if (!userRepository.existsById(userId)) {
-            throw new ResponseStatusException(
-                    HttpStatus.NOT_FOUND,
-                    "User with ID " + userId + " not found"
-            );
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND);
         }
         userRepository.deleteById(userId);
     }

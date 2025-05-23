@@ -8,5 +8,5 @@ import java.util.Optional;
 
 public interface PortfolioRepository extends JpaRepository<Portfolio, Integer> {
     List<Portfolio> findAllByUserId(int userId);
-    Optional<Portfolio> findByUserIdAndPortfolioId(int userId, int portfolioId);
+    Optional<Portfolio> findByUserIdAndId(int userId, int portfolioId);
 }

@@ -1,8 +1,9 @@
 package io.github.m1ddler.my_pet_project.controller;
 
-import io.github.m1ddler.my_pet_project.entity.Portfolio;
+import io.github.m1ddler.my_pet_project.dto.PortfolioDTO;
 import io.github.m1ddler.my_pet_project.service.PortfolioService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -17,24 +18,24 @@ public class PortfolioController {
         this.portfolioService = portfolioService;
     }
 
-    @GetMapping("/users/{userId}")
-    public List<Portfolio> getAllPortfolios(@PathVariable int userId) {
+    @GetMapping("/users/{userId}/portfolios")
+    public ResponseEntity<List<PortfolioDTO>> getAllPortfolios(@PathVariable int userId) {
         return portfolioService.getAllPortfolioByUserId(userId);
     }
 
     @GetMapping("/users/{userId}/portfolios/{portfolioId}")
-    public Portfolio getPortfolio(@PathVariable int userId, @PathVariable int portfolioId) {
+    public ResponseEntity<PortfolioDTO> getPortfolio(@PathVariable int userId, @PathVariable int portfolioId) {
         return portfolioService.getPortfolioByUserIdAndPortfolioId(userId, portfolioId);
     }
 
     @PostMapping("/users/{userId}/portfolios")
-    public Portfolio addPortfolio(@PathVariable int userId, @RequestBody Portfolio portfolio) {
-        return portfolioService.savePortfolio(userId, portfolio);
+    public ResponseEntity<PortfolioDTO> addPortfolio(@PathVariable int userId, @RequestBody PortfolioDTO portfolioDTO) {
+        return portfolioService.savePortfolio(userId, portfolioDTO);
     }
 
-    @PutMapping("/users/{userId}/portfolios")
-    public Portfolio updatePortfolio(@PathVariable int userId, @RequestBody Portfolio portfolio) {
-        return portfolioService.savePortfolio(userId, portfolio);
+    @PutMapping("/users/{userId}/portfolios/{portfolioId}")
+    public ResponseEntity<PortfolioDTO> updatePortfolio(@PathVariable int userId, @PathVariable int portfolioId, @RequestBody PortfolioDTO portfolioDTO) {
+        return portfolioService.updatePortfolio(userId, portfolioId, portfolioDTO);
     }
 
     @DeleteMapping("/users/{userId}/portfolios/{portfolioId}")
