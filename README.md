@@ -1,4 +1,3 @@
-> Ukrainian and English Versions Translate Below / Українська та Англійська версії перекладу
 # 💰 My Pet Project - Криптофінансовий трекер
 
 **My Pet Project** — це Spring Boot застосунок, який дозволяє користувачам контролювати свої криптовалютні прибутки та витрати. Основна ідея полягає у створенні одного або кількох портфоліо, до яких додаються транзакції, що дозволяє відслідковувати фінансову історію кожного портфеля.
@@ -29,27 +28,41 @@
 
 ---
 
-## 🔌 API (коротка інструкція)
+## 🔌 API (Оновлений роутинг - 26.05.2025)
 
 ### 👤 Користувачі `/api/users`
 
-| Метод | Endpoint                  | Опис                        |
-|-------|---------------------------|-----------------------------|
-| GET   | `/api/users`             | Отримати всіх користувачів |
-| GET   | `/api/users/{userId}`    | Отримати користувача за ID |
-| POST  | `/api/users`             | Створити користувача       |
-| PUT   | `/api/users/{userId}`    | Оновити користувача        |
-| DELETE| `/api/users/{userId}`    | Видалити користувача       |
+| Метод  | Endpoint                 | Опис                     |
+|--------|--------------------------|--------------------------|
+| GET    | `/api/users`             | Отримати всіх користувачів |
+| GET    | `/api/users/{userId}`    | Отримати користувача за ID |
+| POST   | `/api/users`             | Створити користувача      |
+| PUT    | `/api/users/{userId}`    | Оновити користувача       |
+| DELETE | `/api/users/{userId}`    | Видалити користувача      |
 
-### 💼 Портфоліо `/api/portfolios`
+---
 
-| Метод | Endpoint                                                              | Опис                                          |
-|-------|-----------------------------------------------------------------------|-----------------------------------------------|
-| GET   | `/api/portfolios/users/{userId}/portfolios`                          | Отримати всі портфоліо користувача            |
-| GET   | `/api/portfolios/users/{userId}/portfolios/{portfolioId}`           | Отримати конкретне портфоліо                  |
-| POST  | `/api/portfolios/users/{userId}/portfolios`                         | Створити портфоліо                            |
-| PUT   | `/api/portfolios/users/{userId}/portfolios/{portfolioId}`          | Оновити портфоліо                             |
-| DELETE| `/api/portfolios/users/{userId}/portfolios/{portfolioId}`          | Видалити портфоліо                            |
+### 💼 Портфоліо `/api/users/{userId}/portfolios`
+
+| Метод  | Endpoint                                       | Опис                         |
+|--------|------------------------------------------------|------------------------------|
+| GET    | `/api/users/{userId}/portfolios`               | Отримати всі портфоліо користувача |
+| GET    | `/api/users/{userId}/portfolios/{portfolioId}`| Отримати конкретне портфоліо |
+| POST   | `/api/users/{userId}/portfolios`               | Створити портфоліо           |
+| PUT    | `/api/users/{userId}/portfolios/{portfolioId}`| Оновити портфоліо            |
+| DELETE | `/api/users/{userId}/portfolios/{portfolioId}`| Видалити портфоліо           |
+
+---
+
+### 💸 Транзакції `/api/users/{userId}/portfolios/{portfolioId}/transactions`
+
+| Метод  | Endpoint                                                        | Опис                          |
+|--------|-----------------------------------------------------------------|-------------------------------|
+| GET    | `/api/users/{userId}/portfolios/{portfolioId}/transactions`     | Отримати всі транзакції портфеля |
+| GET    | `/api/users/{userId}/portfolios/{portfolioId}/transactions/{transactionId}` | Отримати конкретну транзакцію |
+| POST   | `/api/users/{userId}/portfolios/{portfolioId}/transactions`     | Створити транзакцію           |
+| PUT    | `/api/users/{userId}/portfolios/{portfolioId}/transactions/{transactionId}` | Оновити транзакцію            |
+| DELETE | `/api/users/{userId}/portfolios/{portfolioId}/transactions/{transactionId}` | Видалити транзакцію           |
 
 ---
 
@@ -93,27 +106,41 @@
 
 ---
 
-## 🔌 API (Quick Reference)
+## 🔌 API (Updated Routing - 26.05.2025)
 
 ### 👤 Users `/api/users`
 
-| Method | Endpoint                | Description                 |
-|--------|-------------------------|-----------------------------|
-| GET    | `/api/users`           | Get all users               |
-| GET    | `/api/users/{userId}`  | Get user by ID              |
-| POST   | `/api/users`           | Create a user               |
-| PUT    | `/api/users/{userId}`  | Update a user               |
-| DELETE | `/api/users/{userId}`  | Delete a user               |
+| Method | Endpoint                | Description               |
+|--------|-------------------------|---------------------------|
+| GET    | `/api/users`           | Get all users             |
+| GET    | `/api/users/{userId}`  | Get user by ID            |
+| POST   | `/api/users`           | Create a user             |
+| PUT    | `/api/users/{userId}`  | Update a user             |
+| DELETE | `/api/users/{userId}`  | Delete a user             |
 
-### 💼 Portfolios `/api/portfolios`
+---
 
-| Method | Endpoint                                                            | Description                             |
-|--------|---------------------------------------------------------------------|-----------------------------------------|
-| GET    | `/api/portfolios/users/{userId}/portfolios`                        | Get all portfolios of a user            |
-| GET    | `/api/portfolios/users/{userId}/portfolios/{portfolioId}`         | Get specific portfolio                  |
-| POST   | `/api/portfolios/users/{userId}/portfolios`                       | Create a portfolio                      |
-| PUT    | `/api/portfolios/users/{userId}/portfolios/{portfolioId}`        | Update a portfolio                      |
-| DELETE | `/api/portfolios/users/{userId}/portfolios/{portfolioId}`        | Delete a portfolio                      |
+### 💼 Portfolios `/api/users/{userId}/portfolios`
+
+| Method | Endpoint                                        | Description               |
+|--------|------------------------------------------------|---------------------------|
+| GET    | `/api/users/{userId}/portfolios`               | Get all portfolios of a user |
+| GET    | `/api/users/{userId}/portfolios/{portfolioId}`| Get specific portfolio    |
+| POST   | `/api/users/{userId}/portfolios`               | Create a portfolio        |
+| PUT    | `/api/users/{userId}/portfolios/{portfolioId}`| Update a portfolio        |
+| DELETE | `/api/users/{userId}/portfolios/{portfolioId}`| Delete a portfolio        |
+
+---
+
+### 💸 Transactions `/api/users/{userId}/portfolios/{portfolioId}/transactions`
+
+| Method | Endpoint                                                         | Description              |
+|--------|------------------------------------------------------------------|--------------------------|
+| GET    | `/api/users/{userId}/portfolios/{portfolioId}/transactions`     | Get all portfolio transactions |
+| GET    | `/api/users/{userId}/portfolios/{portfolioId}/transactions/{transactionId}` | Get specific transaction |
+| POST   | `/api/users/{userId}/portfolios/{portfolioId}/transactions`     | Create a transaction     |
+| PUT    | `/api/users/{userId}/portfolios/{portfolioId}/transactions/{transactionId}` | Update a transaction     |
+| DELETE | `/api/users/{userId}/portfolios/{portfolioId}/transactions/{transactionId}` | Delete a transaction     |
 
 ---
 
