@@ -1,9 +1,12 @@
 package io.github.m1ddler.my_pet_project.exception_handling;
 
+import java.util.Map;
+
 public class ErrorResponse {
     private String timestamp;
     private int status;
     private String error;
+    private Map<String, String> details;
     private String path;
 
     public ErrorResponse(){}
@@ -34,6 +37,14 @@ public class ErrorResponse {
 
     public String getPath() {
         return path;
+    }
+
+    public Map<String, String> getDetails() {
+        return details;
+    }
+
+    public void setDetails(Map<String, String> details) {
+        this.details = details;
     }
 
     public void setPath(String path) {

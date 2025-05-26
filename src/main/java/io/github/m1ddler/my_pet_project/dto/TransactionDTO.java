@@ -1,55 +1,38 @@
-package io.github.m1ddler.my_pet_project.entity;
-
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import jakarta.persistence.*;
+package io.github.m1ddler.my_pet_project.dto;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
-@Entity
-@Table(name = "transactions")
-public class Transaction {
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "id")
+import jakarta.validation.constraints.Min;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Positive;
+
+public class TransactionDTO {
     private int id;
-    @Column(name = "coin_name")
+    @NotBlank(message = "Coin name cannot be empty or blank")
     private String coinName;
-    @Column(name = "quantity")
+    @NotNull(message = "Quantity of coins cannot be null")
+    @Positive(message = "Quantity of coins must be positive")
     private BigDecimal quantity;
-    @Column(name = "price_per_unit")
+    @NotNull(message = "Price per one coin cannot be null")
+    @Positive(message = "Price per one coin must be positive")
     private BigDecimal pricePerUnit;
-    @Column(name = "transaction_date")
+    @NotNull(message = "Transaction date cannot be null")
     private LocalDateTime transactionDate;
-    @Column(name = "fee")
+    @Min(value = 0, message = "Fee price cannot be lower 0")
     private BigDecimal fee;
-    @Column(name = "note")
     private String note;
-    @ManyToOne
-    @JsonIgnore
-    @JoinColumn(name = "portfolio_id")
-    private Portfolio portfolio;
 
-    public Transaction() {}
-
-    public Transaction(String coinName, BigDecimal quantity,
-                       BigDecimal pricePerUnit, LocalDateTime transactionDate, BigDecimal fee,
-                       String note, Portfolio portfolio) {
+    public TransactionDTO(int id, String coinName, BigDecimal quantity, BigDecimal pricePerUnit,
+                          LocalDateTime transactionDate, BigDecimal fee, String note) {
+        this.id = id;
         this.coinName = coinName;
         this.quantity = quantity;
         this.pricePerUnit = pricePerUnit;
         this.transactionDate = transactionDate;
         this.fee = fee;
         this.note = note;
-        this.portfolio = portfolio;
-    }
-
-    public Portfolio getPortfolio() {
-        return portfolio;
-    }
-
-    public void setPortfolio(Portfolio portfolio) {
-        this.portfolio = portfolio;
     }
 
     public int getId() {
@@ -107,17 +90,4 @@ public class Transaction {
     public void setNote(String note) {
         this.note = note;
     }
-
-    @Override
-    public String toString(){
-        return "Transaction:\n" +
-                "[Id="+id+",\n"
-                +"coinName="+coinName+",\n"
-                +"quantity="+quantity+",\n"
-                +"pricePerUnit="+pricePerUnit+",\n"
-                +"transactionDate="+transactionDate+",\n"
-                +"fee="+fee+",\n"
-                +"note="+note+"]";
-    }
-
 }

@@ -9,7 +9,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/portfolios")
+@RequestMapping("/api/users/{userId}")
 public class PortfolioController {
     private final PortfolioService portfolioService;
 
@@ -18,27 +18,27 @@ public class PortfolioController {
         this.portfolioService = portfolioService;
     }
 
-    @GetMapping("/users/{userId}/portfolios")
+    @GetMapping("/portfolios")
     public ResponseEntity<List<PortfolioDTO>> getAllPortfolios(@PathVariable int userId) {
         return portfolioService.getAllPortfolioByUserId(userId);
     }
 
-    @GetMapping("/users/{userId}/portfolios/{portfolioId}")
+    @GetMapping("/portfolios/{portfolioId}")
     public ResponseEntity<PortfolioDTO> getPortfolio(@PathVariable int userId, @PathVariable int portfolioId) {
         return portfolioService.getPortfolioByUserIdAndPortfolioId(userId, portfolioId);
     }
 
-    @PostMapping("/users/{userId}/portfolios")
+    @PostMapping("/portfolios")
     public ResponseEntity<PortfolioDTO> addPortfolio(@PathVariable int userId, @RequestBody PortfolioDTO portfolioDTO) {
         return portfolioService.savePortfolio(userId, portfolioDTO);
     }
 
-    @PutMapping("/users/{userId}/portfolios/{portfolioId}")
+    @PutMapping("/portfolios/{portfolioId}")
     public ResponseEntity<PortfolioDTO> updatePortfolio(@PathVariable int userId, @PathVariable int portfolioId, @RequestBody PortfolioDTO portfolioDTO) {
         return portfolioService.updatePortfolio(userId, portfolioId, portfolioDTO);
     }
 
-    @DeleteMapping("/users/{userId}/portfolios/{portfolioId}")
+    @DeleteMapping("/portfolios/{portfolioId}")
     public void deletePortfolio(@PathVariable int userId, @PathVariable int portfolioId) {
         portfolioService.deletePortfolio(userId, portfolioId);
     }
