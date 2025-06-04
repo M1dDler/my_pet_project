@@ -10,7 +10,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/users/{userId}/portfolios/{portfolioId}")
+@RequestMapping("/api/v1/transactions")
 public class TransactionController {
     private final TransactionService transactionService;
 
@@ -19,29 +19,24 @@ public class TransactionController {
         this.transactionService = transactionService;
     }
 
-    @GetMapping("/transactions")
-    public ResponseEntity<List<TransactionDTO>> getAllTransactions(@PathVariable int portfolioId) {
-        return transactionService.getAllTransactionsByPortfolioId(portfolioId);
+
+    @GetMapping("/me")
+    public ResponseEntity<TransactionDTO> getTransaction() {
+        return null;
     }
 
-    @GetMapping("/transactions/{transactionId}")
-    public ResponseEntity<TransactionDTO> getTransaction(@PathVariable int transactionId, @PathVariable int portfolioId) {
-        return transactionService.getTransaction(transactionId, portfolioId);
+    @PostMapping("/me")
+    public ResponseEntity<TransactionDTO> createTransaction() {
+        return null;
     }
 
-    @PostMapping("/transactions")
-    public ResponseEntity<TransactionDTO> createTransaction(@PathVariable int portfolioId, @RequestBody @Valid TransactionDTO transactionDTO) {
-        return transactionService.saveTransaction(portfolioId, transactionDTO);
+    @PutMapping("/me")
+    public ResponseEntity<TransactionDTO> updateTransaction() {
+        return null;
     }
 
-    @PutMapping("/transactions/{transactionId}")
-    public ResponseEntity<TransactionDTO> updateTransaction(@PathVariable int transactionId,
-                                                            @PathVariable int portfolioId, @RequestBody @Valid TransactionDTO transactionDTO) {
-        return transactionService.updateTransaction(transactionId, portfolioId, transactionDTO);
-    }
+    @DeleteMapping("/me")
+    public void deleteTransaction(){
 
-    @DeleteMapping("/transactions/{transactionId}")
-    public void deleteTransaction(@PathVariable int transactionId){
-        transactionService.deleteTransaction(transactionId);
     }
 }

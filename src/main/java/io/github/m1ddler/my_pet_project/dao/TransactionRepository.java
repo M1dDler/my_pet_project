@@ -6,7 +6,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import java.util.List;
 import java.util.Optional;
 
-public interface TransactionRepository extends JpaRepository<Transaction, Integer> {
-    List<Transaction> findByPortfolioId(int portfolioId);
-    Optional<Transaction> findByIdAndPortfolioId(int transactionId, int portfolioId);
+public interface TransactionRepository extends JpaRepository<Transaction, Long> {
+    List<Transaction> findByPortfolioId(long portfolioId);
+    Optional<Transaction> findByIdAndPortfolioId(long transactionId, long portfolioId);
 }

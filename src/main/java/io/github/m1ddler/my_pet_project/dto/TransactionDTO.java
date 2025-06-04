@@ -9,7 +9,7 @@ import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
 
 public class TransactionDTO {
-    private int id;
+    private long id;
     @NotBlank(message = "Coin name cannot be empty or blank")
     private String coinName;
     @NotNull(message = "Quantity of coins cannot be null")
@@ -24,7 +24,7 @@ public class TransactionDTO {
     private BigDecimal fee;
     private String note;
 
-    public TransactionDTO(int id, String coinName, BigDecimal quantity, BigDecimal pricePerUnit,
+    public TransactionDTO(long id, String coinName, BigDecimal quantity, BigDecimal pricePerUnit,
                           LocalDateTime transactionDate, BigDecimal fee, String note) {
         this.id = id;
         this.coinName = coinName;
@@ -35,11 +35,11 @@ public class TransactionDTO {
         this.note = note;
     }
 
-    public int getId() {
+    public long getId() {
         return id;
     }
 
-    public void setId(int id) {
+    public void setId(long id) {
         this.id = id;
     }
 

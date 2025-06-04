@@ -13,7 +13,7 @@ public class Portfolio {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id")
-    private int id;
+    private long id;
     @Column(name = "name")
     private String name;
     @Column(name = "total_value")
@@ -64,11 +64,11 @@ public class Portfolio {
         this.totalValue = totalValue;
     }
 
-    public int getId() {
+    public long getId() {
         return id;
     }
 
-    public void setId(int id) {
+    public void setId(long id) {
         this.id = id;
     }
 

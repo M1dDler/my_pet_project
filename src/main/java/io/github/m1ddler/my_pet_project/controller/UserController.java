@@ -2,14 +2,15 @@ package io.github.m1ddler.my_pet_project.controller;
 
 import io.github.m1ddler.my_pet_project.dto.UserDTO;
 import io.github.m1ddler.my_pet_project.service.UserService;
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
-
 @RestController
-@RequestMapping("/api")
+@RequestMapping("/api/v1/users")
+@PreAuthorize("hasRole('USER') or hasRole('ADMIN')")
 public class UserController {
     private final UserService userService;
 
@@ -18,28 +19,18 @@ public class UserController {
         this.userService = userService;
     }
 
-    @GetMapping("/users")
-    public ResponseEntity<List<UserDTO>> getAllUsers() {
-        return userService.getAllUsers();
+    @GetMapping("/me")
+    public ResponseEntity<UserDTO> getCurrentUser() {
+        return userService.getCurrentUser();
     }
 
-    @GetMapping("/users/{userId}")
-    public ResponseEntity<UserDTO> getUserById(@PathVariable int userId) {
-        return userService.getUserById(userId);
+    @PutMapping("/me")
+    public ResponseEntity<UserDTO> updateCurrentUser(@RequestBody @Valid UserDTO userdto) {
+        return userService.updateCurrentUser(userdto);
     }
 
-    @PostMapping("/users")
-    public ResponseEntity<UserDTO> createUser(@RequestBody UserDTO userdto) {
-        return userService.saveUser(userdto);
-    }
-
-    @PutMapping("/users/{userId}")
-    public ResponseEntity<UserDTO> updateUser(@PathVariable int userId, @RequestBody UserDTO userdto) {
-        return userService.updateUser(userId, userdto);
-    }
-
-    @DeleteMapping("/users/{userId}")
-    public void deleteUser(@PathVariable int userId) {
-        userService.deleteUser(userId);
+    @DeleteMapping("/me")
+    public void deleteCurrentUser() {
+        userService.deleteCurrentUser();
     }
 }

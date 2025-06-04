@@ -6,23 +6,23 @@ import java.math.BigDecimal;
 import java.util.List;
 
 public class PortfolioDTO {
-    private int id;
+    private long id;
     private String name;
     private BigDecimal totalValue;
     private List<Transaction> transactions;
 
-    public PortfolioDTO(int id, String name, BigDecimal totalValue, List<Transaction> transactions) {
+    public PortfolioDTO(long id, String name, BigDecimal totalValue, List<Transaction> transactions) {
         this.id = id;
         this.name = name;
         this.totalValue = totalValue;
         this.transactions = transactions;
     }
 
-    public int getId() {
+    public long getId() {
         return id;
     }
 
-    public void setId(int id) {
+    public void setId(long id) {
         this.id = id;
     }
 

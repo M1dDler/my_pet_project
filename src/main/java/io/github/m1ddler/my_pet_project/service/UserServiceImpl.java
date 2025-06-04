@@ -4,14 +4,16 @@ import io.github.m1ddler.my_pet_project.dao.UserRepository;
 import io.github.m1ddler.my_pet_project.dto.UserDTO;
 import io.github.m1ddler.my_pet_project.entity.User;
 import io.github.m1ddler.my_pet_project.exception_handling.EmailAlreadyExistsException;
+import io.github.m1ddler.my_pet_project.exception_handling.UserAlreadyExistsException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
-
-import java.util.List;
-import java.util.Optional;
 
 @Service
 public class UserServiceImpl implements UserService {
@@ -23,74 +25,71 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public ResponseEntity<List<UserDTO>> getAllUsers() {
-        return ResponseEntity.status(HttpStatus.OK).body(userRepository.findAll().stream()
-                .map(u-> new UserDTO(u.getId(), u.getUserName(), u.getEmail(), u.getPortfolios()))
-                .toList());
+    public ResponseEntity<UserDTO> getCurrentUser() {
+        User user = getAuthenticatedUser();
+        return ResponseEntity.status(HttpStatus.OK).body(userToUserDTO(user));
     }
 
     @Override
-    public ResponseEntity<UserDTO> getUserById(int userId) {
-        return ResponseEntity.status(HttpStatus.OK).body(userRepository.findById(userId)
-                .map(u-> new UserDTO(u.getId(), u.getUserName(), u.getEmail(), u.getPortfolios()))
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND)));
-    }
-
-    @Override
-    public ResponseEntity<UserDTO> saveUser(UserDTO userDTO) {
-        if (userRepository.existsUserByEmail(userDTO.getEmail())){
-            throw new EmailAlreadyExistsException("Email already exists");
-        }
-        User user = new User(userDTO.getUserName(), userDTO.getEmail());
-        User savedUser = userRepository.save(user);
-        return ResponseEntity.status(HttpStatus.OK).body(new UserDTO(
-                savedUser.getId(),
-                savedUser.getUserName(),
-                savedUser.getEmail(),
-                savedUser.getPortfolios()
-        ));
-    }
-
-    @Override
-    public ResponseEntity<UserDTO> updateUser(int userId, UserDTO updatedUserDTO) {
+    public ResponseEntity<UserDTO> updateCurrentUser(UserDTO userDTO) {
         boolean changed = false;
 
-        User existingUser = userRepository.findById(userId)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
+        User existingUser = getAuthenticatedUser();
 
-        if (!existingUser.getEmail().equals(updatedUserDTO.getEmail())) {
-            Optional<User> userWithEmail = userRepository.findByEmail(updatedUserDTO.getEmail());
-            if (userWithEmail.isPresent() && userWithEmail.get().getId() != userId) {
+        if (!existingUser.getEmail().equalsIgnoreCase(userDTO.getEmail())) {
+            if (userRepository.existsUserByEmail(userDTO.getEmail())) {
                 throw new EmailAlreadyExistsException("Email already exists");
             }
-            existingUser.setEmail(updatedUserDTO.getEmail());
+            existingUser.setEmail(userDTO.getEmail());
             changed = true;
         }
 
-        if (!existingUser.getUserName().equals(updatedUserDTO.getUserName())) {
-            existingUser.setUserName(updatedUserDTO.getUserName());
+        if (!existingUser.getUsername().equals(userDTO.getUsername())) {
+            if (userRepository.existsUserByUsername(userDTO.getUsername())) {
+                throw new UserAlreadyExistsException("Username already exists");
+            }
+            existingUser.setUsername(userDTO.getUsername());
             changed = true;
         }
 
-        if(changed) {
-            User savedUser = userRepository.save(existingUser);
-            return ResponseEntity.status(HttpStatus.OK).body(new UserDTO(
-                    savedUser.getId(),
-                    savedUser.getUserName(),
-                    savedUser.getEmail(),
-                    savedUser.getPortfolios()
-            ));
-        }
-        else{
+        if(!changed) {
             return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
         }
+
+        return ResponseEntity.status(HttpStatus.OK).body(userToUserDTO(userRepository.save(existingUser)));
     }
 
     @Override
-    public void deleteUser(int userId) {
-        if (!userRepository.existsById(userId)) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND);
+    public void deleteCurrentUser() {
+        userRepository.delete(getAuthenticatedUser());
+    }
+
+    @Override
+    public UserDetails loadUserByUsername(String userName){
+        return userRepository.findByUsername(userName)
+                .orElseThrow(() -> new UsernameNotFoundException("User not found"));
+    }
+
+    @Override
+    public User getAuthenticatedUser() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+
+        if (authentication == null || !authentication.isAuthenticated()) {
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED);
         }
-        userRepository.deleteById(userId);
+
+        String username = authentication.getName();
+        return userRepository.findByUsername(username)
+                .orElseThrow(() -> new UsernameNotFoundException("User not found"));
+    }
+
+    private UserDTO userToUserDTO(User user) {
+        return new UserDTO(
+                user.getId(),
+                user.getRole(),
+                user.getUsername(),
+                user.getEmail(),
+                user.getPortfolios()
+        );
     }
 }

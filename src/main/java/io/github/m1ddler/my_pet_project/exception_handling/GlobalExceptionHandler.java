@@ -15,14 +15,15 @@ import java.util.Map;
 @ControllerAdvice
 public class GlobalExceptionHandler {
     @ExceptionHandler
-    public ResponseEntity<ErrorResponse> handleUserEmailException(EmailAlreadyExistsException e,
-                                                                  HttpServletRequest request) {
-        ErrorResponse data = new ErrorResponse();
-        data.setTimestamp(Instant.now().toString());
-        data.setStatus(HttpStatus.CONFLICT.value());
-        data.setError(e.getMessage());
-        data.setPath(request.getRequestURI());
-        return new ResponseEntity<>(data, HttpStatus.CONFLICT);
+    public ResponseEntity<ErrorResponse> handleEmailAlreadyExistsException(
+            EmailAlreadyExistsException e, HttpServletRequest request) {
+        return buildErrorResponse(e, request);
+    }
+
+    @ExceptionHandler
+    public ResponseEntity<ErrorResponse> handleUserAlreadyExistsException(
+            UserAlreadyExistsException e, HttpServletRequest request) {
+        return buildErrorResponse(e, request);
     }
 
     @ExceptionHandler
@@ -41,5 +42,15 @@ public class GlobalExceptionHandler {
         data.setDetails(errors);
         data.setPath(request.getRequestURI());
         return new ResponseEntity<>(data, HttpStatus.BAD_REQUEST);
+    }
+
+    private ResponseEntity<ErrorResponse> buildErrorResponse(
+            Exception e, HttpServletRequest request) {
+        ErrorResponse data = new ErrorResponse();
+        data.setTimestamp(Instant.now().toString());
+        data.setStatus(HttpStatus.CONFLICT.value());
+        data.setError(e.getMessage());
+        data.setPath(request.getRequestURI());
+        return new ResponseEntity<>(data, HttpStatus.CONFLICT);
     }
 }

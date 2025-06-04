@@ -9,7 +9,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/users/{userId}")
+@RequestMapping("/api/v1/portfolios")
 public class PortfolioController {
     private final PortfolioService portfolioService;
 
@@ -18,28 +18,23 @@ public class PortfolioController {
         this.portfolioService = portfolioService;
     }
 
-    @GetMapping("/portfolios")
-    public ResponseEntity<List<PortfolioDTO>> getAllPortfolios(@PathVariable int userId) {
-        return portfolioService.getAllPortfolioByUserId(userId);
+
+    @GetMapping("/me")
+    public ResponseEntity<List<PortfolioDTO>> getCurrentUserPortfolios() {
+        return portfolioService.getCurrentUserPortfolios();
     }
 
-    @GetMapping("/portfolios/{portfolioId}")
-    public ResponseEntity<PortfolioDTO> getPortfolio(@PathVariable int userId, @PathVariable int portfolioId) {
-        return portfolioService.getPortfolioByUserIdAndPortfolioId(userId, portfolioId);
+    @PostMapping("/me")
+    public ResponseEntity<PortfolioDTO> addPortfolio(@RequestBody PortfolioDTO portfolioDTO) {
+        return null;
     }
 
-    @PostMapping("/portfolios")
-    public ResponseEntity<PortfolioDTO> addPortfolio(@PathVariable int userId, @RequestBody PortfolioDTO portfolioDTO) {
-        return portfolioService.savePortfolio(userId, portfolioDTO);
+    @PutMapping("/me")
+    public ResponseEntity<PortfolioDTO> updatePortfolio(@RequestBody PortfolioDTO portfolioDTO) {
+        return null;
     }
 
-    @PutMapping("/portfolios/{portfolioId}")
-    public ResponseEntity<PortfolioDTO> updatePortfolio(@PathVariable int userId, @PathVariable int portfolioId, @RequestBody PortfolioDTO portfolioDTO) {
-        return portfolioService.updatePortfolio(userId, portfolioId, portfolioDTO);
-    }
-
-    @DeleteMapping("/portfolios/{portfolioId}")
-    public void deletePortfolio(@PathVariable int userId, @PathVariable int portfolioId) {
-        portfolioService.deletePortfolio(userId, portfolioId);
+    @DeleteMapping("/me")
+    public void deletePortfolio() {
     }
 }

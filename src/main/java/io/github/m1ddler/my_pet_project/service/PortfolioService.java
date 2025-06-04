@@ -6,9 +6,5 @@ import org.springframework.http.ResponseEntity;
 import java.util.List;
 
 public interface PortfolioService {
-    ResponseEntity<List<PortfolioDTO>> getAllPortfolioByUserId(int userId);
-    ResponseEntity<PortfolioDTO> getPortfolioByUserIdAndPortfolioId(int userId, int portfolioId);
-    ResponseEntity<PortfolioDTO> savePortfolio(int userId, PortfolioDTO portfolioDTO);
-    ResponseEntity<PortfolioDTO> updatePortfolio(int userId, int portfolioId, PortfolioDTO portfolioDTO);
-    void deletePortfolio(int userId, int portfolioId);
+    ResponseEntity<List<PortfolioDTO>> getCurrentUserPortfolios();
 }
