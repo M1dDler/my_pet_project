@@ -7,4 +7,8 @@ import java.util.List;
 
 public interface PortfolioService {
     ResponseEntity<List<PortfolioDTO>> getCurrentUserPortfolios();
+    ResponseEntity<PortfolioDTO> getCurrentUserPortfolioById(Long id);
+    ResponseEntity<PortfolioDTO> saveCurrentUserPortfolio(PortfolioDTO portfolioDTO);
+    ResponseEntity<PortfolioDTO> updateCurrentUserPortfolioById(Long id, PortfolioDTO portfolioDTO);
+    ResponseEntity<Void> deleteCurrentUserPortfolioById(Long id);
 }

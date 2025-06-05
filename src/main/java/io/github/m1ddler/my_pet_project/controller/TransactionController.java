@@ -10,7 +10,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/v1/transactions")
+@RequestMapping("/api/v1/users/me/portfolios")
 public class TransactionController {
     private final TransactionService transactionService;
 
@@ -20,23 +20,29 @@ public class TransactionController {
     }
 
 
-    @GetMapping("/me")
-    public ResponseEntity<TransactionDTO> getTransaction() {
-        return null;
+    @GetMapping("/{portfolioId}/transactions")
+    public ResponseEntity<List<TransactionDTO>> getCurrentUserTransactions(@PathVariable Long portfolioId) {
+        return transactionService.getCurrentUserTransactionsByPortfolioId(portfolioId);
     }
 
-    @PostMapping("/me")
-    public ResponseEntity<TransactionDTO> createTransaction() {
-        return null;
+    @GetMapping("/{portfolioId}/transactions/{id}")
+    public ResponseEntity<TransactionDTO> getCurrentUserTransaction(@PathVariable Long id, @PathVariable Long portfolioId) {
+        return transactionService.getCurrentUserTransactionByIdByPortfolioId(id, portfolioId);
     }
 
-    @PutMapping("/me")
-    public ResponseEntity<TransactionDTO> updateTransaction() {
-        return null;
+    @PostMapping("/{portfolioId}/transactions")
+    public ResponseEntity<TransactionDTO> saveCurrentUserTransaction(@PathVariable Long portfolioId, @RequestBody @Valid TransactionDTO transactionDTO) {
+        return transactionService.saveCurrentUserTransactionByPortfolioId(portfolioId, transactionDTO);
     }
 
-    @DeleteMapping("/me")
-    public void deleteTransaction(){
+    @PutMapping("/{portfolioId}/transactions/{id}")
+    public ResponseEntity<TransactionDTO> updateTransaction(@PathVariable Long portfolioId,
+                                                            @PathVariable Long id, @RequestBody TransactionDTO transactionDTO) {
+        return transactionService.updateCurrentUserTransactionByIdByPortfolioId(id, portfolioId, transactionDTO);
+    }
 
+    @DeleteMapping("/{portfolioId}/transactions/{id}")
+    public ResponseEntity<Void> deleteTransaction(@PathVariable Long id, @PathVariable Long portfolioId) {
+        return transactionService.deleteCurrentUserTransactionByIdByPortfolioId(id, portfolioId);
     }
 }

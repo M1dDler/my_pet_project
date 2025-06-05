@@ -1,12 +1,16 @@
 package io.github.m1ddler.my_pet_project.dto;
 
 import io.github.m1ddler.my_pet_project.entity.Transaction;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Size;
 
 import java.math.BigDecimal;
 import java.util.List;
 
 public class PortfolioDTO {
     private long id;
+    @NotBlank(message = "Portfolio name cannot be empty")
+    @Size(max = 30, message = "The name is too long. Maximum allowed is 30 characters")
     private String name;
     private BigDecimal totalValue;
     private List<Transaction> transactions;
