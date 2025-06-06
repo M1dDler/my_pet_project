@@ -13,62 +13,73 @@
 - REST API
 - Maven
 - dotenv
+- Spring Security (JWT авторизація)
 
 ---
 
 ## 🧩 Структура проєкту
 
+- `config/` — налаштування безпеки (`SecurityConfig.java`)
 - `controller/` — REST-контролери для користувачів та портфоліо
-- `dao/` — DAO-інтерфейси (UserDAO, PortfolioDAO)
+- `dao/` — DAO-інтерфейси для роботи з БД 
 - `dotenv/` — конфігурація для роботи з `.env` файлами
-- `dto/` — DTO-класи для передачі даних (UserDTO, PortfolioDTO)
-- `entity/` — Entity-класи: User, Portfolio, Transaction
-- `exception_handler/` — Глобальний обробник помилок API
-- `service/` — Бізнес-логіка для користувачів та портфоліо
+- `dto/` — DTO-класи для передачі даних Entity класів
+- `entity/` — Entity-класи
+- `exception_handling/` — Глобальний обробник помилок API
+- `filter/` — JWT фільтр (`JwtFilter.java`) для обробки токенів
+- `handler/` — обробники безпеки
+- `service/` — Бізнес-логіка для користувачів, портфоліо
 
 ---
 
-## 🔌 API (Оновлений роутинг - 26.05.2025)
+## 🔌 API (Оновлений роутинг - 05.06.2025)
 
-### 👤 Користувачі `/api/users`
+### 🛡️ Авторизація `/api/v1/auth`
 
-| Метод  | Endpoint                 | Опис                     |
-|--------|--------------------------|--------------------------|
-| GET    | `/api/users`             | Отримати всіх користувачів |
-| GET    | `/api/users/{userId}`    | Отримати користувача за ID |
-| POST   | `/api/users`             | Створити користувача      |
-| PUT    | `/api/users/{userId}`    | Оновити користувача       |
-| DELETE | `/api/users/{userId}`    | Видалити користувача      |
+| Метод  | Endpoint           | Опис                  |
+|--------|--------------------|-----------------------|
+| POST   | `/api/v1/auth/login`    | Авторизація користувача  |
+| POST   | `/api/v1/auth/register` | Реєстрація користувача  |
 
 ---
 
-### 💼 Портфоліо `/api/users/{userId}/portfolios`
+### 👤 Користувачі `/api/v1/users/me`
 
-| Метод  | Endpoint                                       | Опис                         |
-|--------|------------------------------------------------|------------------------------|
-| GET    | `/api/users/{userId}/portfolios`               | Отримати всі портфоліо користувача |
-| GET    | `/api/users/{userId}/portfolios/{portfolioId}`| Отримати конкретне портфоліо |
-| POST   | `/api/users/{userId}/portfolios`               | Створити портфоліо           |
-| PUT    | `/api/users/{userId}/portfolios/{portfolioId}`| Оновити портфоліо            |
-| DELETE | `/api/users/{userId}/portfolios/{portfolioId}`| Видалити портфоліо           |
+| Метод  | Endpoint                 | Опис                                |
+|--------|--------------------------|------------------------------------|
+| GET    | `/api/v1/users/me`       | Отримати дані авторизованого користувача  |
+| PUT    | `/api/v1/users/me`       | Оновити дані авторизованого користувача    |
+| DELETE | `/api/v1/users/me`       | Видалити акаунт авторизованого користувача  |
 
 ---
 
-### 💸 Транзакції `/api/users/{userId}/portfolios/{portfolioId}/transactions`
+### 💼 Портфоліо `/api/v1/users/me/portfolios`
 
-| Метод  | Endpoint                                                        | Опис                          |
-|--------|-----------------------------------------------------------------|-------------------------------|
-| GET    | `/api/users/{userId}/portfolios/{portfolioId}/transactions`     | Отримати всі транзакції портфеля |
-| GET    | `/api/users/{userId}/portfolios/{portfolioId}/transactions/{transactionId}` | Отримати конкретну транзакцію |
-| POST   | `/api/users/{userId}/portfolios/{portfolioId}/transactions`     | Створити транзакцію           |
-| PUT    | `/api/users/{userId}/portfolios/{portfolioId}/transactions/{transactionId}` | Оновити транзакцію            |
-| DELETE | `/api/users/{userId}/portfolios/{portfolioId}/transactions/{transactionId}` | Видалити транзакцію           |
+| Метод  | Endpoint                              | Опис                                 |
+|--------|-------------------------------------|-------------------------------------|
+| GET    | `/api/v1/users/me/portfolios`       | Отримати всі портфоліо користувача |
+| POST   | `/api/v1/users/me/portfolios`       | Створити нове портфоліо користувача              |
+| GET    | `/api/v1/users/me/portfolios/{id}`  | Отримати конкретне портфоліо за ID  |
+| PUT    | `/api/v1/users/me/portfolios/{id}`  | Оновити портфоліо                    |
+| DELETE | `/api/v1/users/me/portfolios/{id}`  | Видалити портфоліо                   |
+
+---
+
+### 💸 Транзакції `/api/v1/users/me/portfolios/{id}/transactions`
+
+| Метод  | Endpoint                                                | Опис                                  |
+|--------|---------------------------------------------------------|--------------------------------------|
+| GET    | `/api/v1/users/me/portfolios/{portfolioId}/transactions`         | Отримати всі транзакції портфоліо    |
+| POST   | `/api/v1/users/me/portfolios/{portfolioId}/transactions`         | Додати нову транзакцію в портфоліо               |
+| GET    | `/api/v1/users/me/portfolios/{portfolioId}/transactions/{id}`   | Отримати конкретну транзакцію за ID |
+| PUT    | `/api/v1/users/me/portfolios/{portfolioId}/transactions/{id}`   | Оновити транзакцію                   |
+| DELETE | `/api/v1/users/me/portfolios/{portfolioId}/transactions/{id}`   | Видалити транзакцію                  |
 
 ---
 
 ## 📌 Стан проєкту
 
-Проєкт перебуває в активній розробці. Основна функціональність back-end уже майже реалізована, однак можливі подальші вдосконалення, рефакторинг і розширення функцій у майбутньому.
+Проєкт перебуває в активній розробці. Основна функціональність Back-End уже майже реалізована, включно з JWT-авторизацією. Подальші плани включають рефакторинг, покращення валідації даних, створення Front-End частини.
 
 ---
 
@@ -78,7 +89,7 @@
 
 # 💰 My Pet Project - Crypto Financial Tracker
 
-**My Pet Project** is a Spring Boot application that allows users to manage their cryptocurrency profits and expenses. Users can create one or multiple portfolios, each containing individual transactions, enabling clear financial tracking.
+**My Pet Project** is a Spring Boot application that allows users to track their cryptocurrency income and expenses. The main idea is to create one or more portfolios, to which transactions can be added. This allows tracking the financial history of each individual portfolio.
 
 ---
 
@@ -87,63 +98,74 @@
 - Java 17+
 - Spring Boot
 - Spring Data JPA
-- PostgreSQL (or another RDBMS)
+- PostgreSQL (or another relational database)
 - REST API
 - Maven
 - dotenv
+- Spring Security (JWT authentication)
 
 ---
 
 ## 🧩 Project Structure
 
-- `controller/` — REST controllers for Users and Portfolios
-- `dao/` — DAO interfaces (UserDAO, PortfolioDAO)
-- `dotenv/` — Configuration for `.env` support
-- `dto/` — Data Transfer Objects (UserDTO, PortfolioDTO)
-- `entity/` — Entity classes: User, Portfolio, Transaction
-- `exception_handler/` — Global REST API error handler
-- `service/` — Business logic for User and Portfolio operations
+- `config/` — security configuration (`SecurityConfig.java`)
+- `controller/` — REST controllers for users and portfolios
+- `dao/` — DAO interfaces for working with the database
+- `dotenv/` — configuration for working with `.env` files
+- `dto/` — DTO classes for transferring data between Entity classes and the outside world
+- `entity/` — Entity classes
+- `exception_handling/` — Global API exception handler
+- `filter/` — JWT filter (`JwtFilter.java`) for processing tokens
+- `handler/` — custom security handlers
+- `service/` — Business logic for users and portfolios
 
 ---
 
-## 🔌 API (Updated Routing - 26.05.2025)
+## 🔌 API (Updated Routing - 05.06.2025)
 
-### 👤 Users `/api/users`
+### 🛡️ Authentication `/api/v1/auth`
 
-| Method | Endpoint                | Description               |
-|--------|-------------------------|---------------------------|
-| GET    | `/api/users`           | Get all users             |
-| GET    | `/api/users/{userId}`  | Get user by ID            |
-| POST   | `/api/users`           | Create a user             |
-| PUT    | `/api/users/{userId}`  | Update a user             |
-| DELETE | `/api/users/{userId}`  | Delete a user             |
+| Method | Endpoint                 | Description              |
+|--------|--------------------------|--------------------------|
+| POST   | `/api/v1/auth/login`     | User login               |
+| POST   | `/api/v1/auth/register`  | User registration        |
 
 ---
 
-### 💼 Portfolios `/api/users/{userId}/portfolios`
+### 👤 Users `/api/v1/users/me`
 
-| Method | Endpoint                                        | Description               |
-|--------|------------------------------------------------|---------------------------|
-| GET    | `/api/users/{userId}/portfolios`               | Get all portfolios of a user |
-| GET    | `/api/users/{userId}/portfolios/{portfolioId}`| Get specific portfolio    |
-| POST   | `/api/users/{userId}/portfolios`               | Create a portfolio        |
-| PUT    | `/api/users/{userId}/portfolios/{portfolioId}`| Update a portfolio        |
-| DELETE | `/api/users/{userId}/portfolios/{portfolioId}`| Delete a portfolio        |
+| Method | Endpoint             | Description                            |
+|--------|----------------------|----------------------------------------|
+| GET    | `/api/v1/users/me`   | Get the currently authorized user’s data |
+| PUT    | `/api/v1/users/me`   | Update the authorized user's data      |
+| DELETE | `/api/v1/users/me`   | Delete the authorized user's account   |
 
 ---
 
-### 💸 Transactions `/api/users/{userId}/portfolios/{portfolioId}/transactions`
+### 💼 Portfolios `/api/v1/users/me/portfolios`
 
-| Method | Endpoint                                                         | Description              |
-|--------|------------------------------------------------------------------|--------------------------|
-| GET    | `/api/users/{userId}/portfolios/{portfolioId}/transactions`     | Get all portfolio transactions |
-| GET    | `/api/users/{userId}/portfolios/{portfolioId}/transactions/{transactionId}` | Get specific transaction |
-| POST   | `/api/users/{userId}/portfolios/{portfolioId}/transactions`     | Create a transaction     |
-| PUT    | `/api/users/{userId}/portfolios/{portfolioId}/transactions/{transactionId}` | Update a transaction     |
-| DELETE | `/api/users/{userId}/portfolios/{portfolioId}/transactions/{transactionId}` | Delete a transaction     |
+| Method | Endpoint                                | Description                        |
+|--------|-----------------------------------------|------------------------------------|
+| GET    | `/api/v1/users/me/portfolios`           | Get all portfolios of the user     |
+| POST   | `/api/v1/users/me/portfolios`           | Create a new user portfolio        |
+| GET    | `/api/v1/users/me/portfolios/{id}`      | Get a specific portfolio by ID     |
+| PUT    | `/api/v1/users/me/portfolios/{id}`      | Update a portfolio                 |
+| DELETE | `/api/v1/users/me/portfolios/{id}`      | Delete a portfolio                 |
+
+---
+
+### 💸 Transactions `/api/v1/users/me/portfolios/{id}/transactions`
+
+| Method | Endpoint                                                  | Description                          |
+|--------|-----------------------------------------------------------|--------------------------------------|
+| GET    | `/api/v1/users/me/portfolios/{portfolioId}/transactions`           | Get all transactions in the portfolio |
+| POST   | `/api/v1/users/me/portfolios/{portfolioId}/transactions`           | Add a new transaction to the portfolio |
+| GET    | `/api/v1/users/me/portfolios/{portfolioId}/transactions/{id}`     | Get a specific transaction by ID     |
+| PUT    | `/api/v1/users/me/portfolios/{portfolioId}/transactions/{id}`     | Update a transaction                 |
+| DELETE | `/api/v1/users/me/portfolios/{portfolioId}/transactions/{id}`     | Delete a transaction                 |
 
 ---
 
 ## 📌 Project Status
 
-The project is under active development. The main back-end functionality is almost implemented, but further improvements, refactorings, and feature extensions are possible in the future.
+The project is under active development. The core Back-End functionality is nearly complete, including JWT authentication. Future plans include refactoring, improving data validation, and developing the Front-End part.
