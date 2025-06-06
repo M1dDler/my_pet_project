@@ -15,11 +15,10 @@ public class PortfolioDTO {
     private BigDecimal totalValue;
     private List<Transaction> transactions;
 
-    public PortfolioDTO(long id, String name, BigDecimal totalValue, List<Transaction> transactions) {
+    public PortfolioDTO(long id, String name, BigDecimal totalValue) {
         this.id = id;
         this.name = name;
         this.totalValue = totalValue;
-        this.transactions = transactions;
     }
 
     public long getId() {
@@ -46,11 +45,4 @@ public class PortfolioDTO {
         this.totalValue = totalValue;
     }
 
-    public List<Transaction> getTransactions() {
-        return transactions;
-    }
-
-    public void setTransactions(List<Transaction> transactions) {
-        this.transactions = transactions;
-    }
 }

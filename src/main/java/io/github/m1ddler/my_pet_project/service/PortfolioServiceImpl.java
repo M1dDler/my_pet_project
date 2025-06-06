@@ -27,7 +27,7 @@ public class PortfolioServiceImpl implements PortfolioService {
 
     @Override
     public ResponseEntity<List<PortfolioDTO>> getCurrentUserPortfolios() {
-        List<Portfolio> portfolios = userService.getAuthenticatedUser().getPortfolios();
+        List<Portfolio> portfolios = portfolioRepository.findAllByUserId(userService.getAuthenticatedUser().getId());
 
         List<PortfolioDTO> portfoliosDTO = portfolios.stream()
                 .map(this::portfolioToPortfolioDTO)
@@ -38,11 +38,11 @@ public class PortfolioServiceImpl implements PortfolioService {
 
     @Override
     public ResponseEntity<PortfolioDTO> getCurrentUserPortfolioById(Long id) {
-        Portfolio portfolio = userService.getAuthenticatedUser().getPortfolios().stream()
-                .filter(p -> p.getId() == id).findFirst().orElse(null);
+        Portfolio portfolio = portfolioRepository.findByUserIdAndId(userService.getAuthenticatedUser().getId(), id)
+                .orElse(null);
 
         if (portfolio == null) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
         }
 
         return ResponseEntity.status(HttpStatus.OK).body(portfolioToPortfolioDTO(portfolio));
@@ -57,26 +57,31 @@ public class PortfolioServiceImpl implements PortfolioService {
 
     @Override
     public ResponseEntity<PortfolioDTO> updateCurrentUserPortfolioById(Long id, PortfolioDTO portfolioDTO) {
-        Portfolio portfolio = userService.getAuthenticatedUser().getPortfolios()
-                .stream().filter(p -> p.getId() == id).findFirst().orElse(null);
+        Portfolio portfolio = portfolioRepository.findByUserIdAndId(userService.getAuthenticatedUser().getId(), id)
+                .orElse(null);
+
         if (portfolio == null) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
         }
+
         if (!portfolioDTO.getName().equals(portfolio.getName())) {
             portfolio.setName(portfolioDTO.getName());
             portfolioRepository.save(portfolio);
             return ResponseEntity.status(HttpStatus.OK).body(portfolioToPortfolioDTO(portfolio));
         }
+
         return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
     }
 
     @Override
     public ResponseEntity<Void> deleteCurrentUserPortfolioById(Long id){
-        Portfolio portfolio = userService.getAuthenticatedUser().getPortfolios()
-                .stream().filter(p -> p.getId() == id).findFirst().orElse(null);
+        Portfolio portfolio = portfolioRepository.findByUserIdAndId(userService.getAuthenticatedUser().getId(), id)
+                .orElse(null);
+
         if (portfolio == null) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
         }
+
         portfolioRepository.delete(portfolio);
         return ResponseEntity.status(HttpStatus.OK).build();
     }
@@ -85,8 +90,7 @@ public class PortfolioServiceImpl implements PortfolioService {
         return new PortfolioDTO(
                 portfolio.getId(),
                 portfolio.getName(),
-                portfolio.getTotalValue(),
-                portfolio.getTransactions()
+                portfolio.getTotalValue()
         );
     }
 }

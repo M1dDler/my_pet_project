@@ -21,7 +21,7 @@ public class User implements UserDetails {
     private String email;
     @Column(name = "password")
     private String password;
-    @OneToMany(cascade = CascadeType.REMOVE, mappedBy = "user", fetch = FetchType.EAGER, orphanRemoval = true)
+    @OneToMany(cascade = CascadeType.REMOVE, mappedBy = "user", fetch = FetchType.LAZY, orphanRemoval = true)
     private List<Portfolio> portfolios;
     @Enumerated(EnumType.STRING)
     private Role role;

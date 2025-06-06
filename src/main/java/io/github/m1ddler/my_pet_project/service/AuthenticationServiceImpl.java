@@ -68,8 +68,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
                 savedUser.getId(),
                 savedUser.getRole(),
                 savedUser.getUsername(),
-                savedUser.getEmail(),
-                savedUser.getPortfolios()
+                savedUser.getEmail()
         ));
     }
 

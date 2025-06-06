@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.Optional;
 
 public interface TransactionRepository extends JpaRepository<Transaction, Long> {
-    List<Transaction> findByPortfolioId(long portfolioId);
-    Optional<Transaction> findByIdAndPortfolioId(long transactionId, long portfolioId);
+    List<Transaction> findAllByPortfolioId(Long portfolioId);
+    Transaction findByIdAndPortfolioId(Long transactionId, Long portfolioId);
+    boolean existsByIdAndPortfolioId(Long transactionId, Long portfolioId);
 }

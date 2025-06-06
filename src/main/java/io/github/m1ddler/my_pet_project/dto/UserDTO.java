@@ -17,14 +17,12 @@ public class UserDTO {
     private final String username;
     @NotBlank(message = "Email cannot be empty or blank")
     private final String email;
-    private final List<Portfolio> portfolios;
 
-    public UserDTO(long id, Role role, String username, String email, List<Portfolio> portfolios) {
+    public UserDTO(long id, Role role, String username, String email) {
         this.id = id;
         this.role = role;
         this.username = username;
         this.email = email;
-        this.portfolios = portfolios;
     }
 
     public long getId() {
@@ -43,7 +41,4 @@ public class UserDTO {
         return email;
     }
 
-    public List<Portfolio> getPortfolios() {
-        return portfolios;
-    }
 }

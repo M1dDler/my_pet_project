@@ -26,7 +26,6 @@ public class Transaction {
     @Column(name = "note")
     private String note;
     @ManyToOne
-    @JsonIgnore
     @JoinColumn(name = "portfolio_id")
     private Portfolio portfolio;
 

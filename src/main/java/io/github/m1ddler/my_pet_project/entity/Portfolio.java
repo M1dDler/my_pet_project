@@ -18,11 +18,10 @@ public class Portfolio {
     private String name;
     @Column(name = "total_value")
     private BigDecimal totalValue;
-    @JsonIgnore
     @ManyToOne
     @JoinColumn(name = "user_id")
     private User user;
-    @OneToMany(mappedBy = "portfolio", fetch = FetchType.EAGER, cascade = CascadeType.REMOVE, orphanRemoval = true)
+    @OneToMany(mappedBy = "portfolio", fetch = FetchType.LAZY, cascade = CascadeType.REMOVE, orphanRemoval = true)
     private List<Transaction> transactions;
 
     public Portfolio() {}

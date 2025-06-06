@@ -88,8 +88,7 @@ public class UserServiceImpl implements UserService {
                 user.getId(),
                 user.getRole(),
                 user.getUsername(),
-                user.getEmail(),
-                user.getPortfolios()
+                user.getEmail()
         );
     }
 }
