@@ -16,8 +16,8 @@ public class Portfolio {
     private long id;
     @Column(name = "name")
     private String name;
-    @Column(name = "total_value")
-    private BigDecimal totalValue;
+    @Column(name = "total_value", nullable = false)
+    private BigDecimal totalValue = BigDecimal.ZERO;
     @ManyToOne
     @JoinColumn(name = "user_id")
     private User user;

@@ -17,13 +17,19 @@ public class GlobalExceptionHandler {
     @ExceptionHandler
     public ResponseEntity<ErrorResponse> handleEmailAlreadyExistsException(
             EmailAlreadyExistsException e, HttpServletRequest request) {
-        return buildErrorResponse(e, request);
+        return buildErrorResponse(e, request, HttpStatus.CONFLICT);
     }
 
     @ExceptionHandler
     public ResponseEntity<ErrorResponse> handleUserAlreadyExistsException(
             UserAlreadyExistsException e, HttpServletRequest request) {
-        return buildErrorResponse(e, request);
+        return buildErrorResponse(e, request, HttpStatus.CONFLICT);
+    }
+
+    @ExceptionHandler
+    public ResponseEntity<ErrorResponse> handleTransactionException(
+            TransactionException e, HttpServletRequest request) {
+        return buildErrorResponse(e, request, HttpStatus.INTERNAL_SERVER_ERROR);
     }
 
     @ExceptionHandler
@@ -45,12 +51,12 @@ public class GlobalExceptionHandler {
     }
 
     private ResponseEntity<ErrorResponse> buildErrorResponse(
-            Exception e, HttpServletRequest request) {
+            Exception e, HttpServletRequest request, HttpStatus status) {
         ErrorResponse data = new ErrorResponse();
         data.setTimestamp(Instant.now().toString());
-        data.setStatus(HttpStatus.CONFLICT.value());
+        data.setStatus(status.value());
         data.setError(e.getMessage());
         data.setPath(request.getRequestURI());
-        return new ResponseEntity<>(data, HttpStatus.CONFLICT);
+        return new ResponseEntity<>(data, status);
     }
 }

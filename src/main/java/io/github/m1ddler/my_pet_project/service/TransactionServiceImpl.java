@@ -5,13 +5,18 @@ import io.github.m1ddler.my_pet_project.dao.TransactionRepository;
 import io.github.m1ddler.my_pet_project.dto.TransactionDTO;
 import io.github.m1ddler.my_pet_project.entity.Portfolio;
 import io.github.m1ddler.my_pet_project.entity.Transaction;
+import io.github.m1ddler.my_pet_project.exception_handling.TransactionException;
+import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
+import java.math.BigDecimal;
 import java.util.List;
 import java.util.stream.Collectors;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 @Service
 public class TransactionServiceImpl implements TransactionService {
@@ -27,6 +32,7 @@ public class TransactionServiceImpl implements TransactionService {
         this.portfolioRepository = portfolioRepository;
     }
 
+    Logger log = LoggerFactory.getLogger(getClass());
 
     @Override
     public ResponseEntity<List<TransactionDTO>> getCurrentUserTransactionsByPortfolioId(Long portfolioId) {
@@ -57,6 +63,7 @@ public class TransactionServiceImpl implements TransactionService {
         return ResponseEntity.status(HttpStatus.OK).body(transactionToDTO(transaction));
     }
 
+    @Transactional
     @Override
     public ResponseEntity<TransactionDTO> saveCurrentUserTransactionByPortfolioId(Long portfolioId,
                                                                                   TransactionDTO tDTO) {
@@ -67,10 +74,22 @@ public class TransactionServiceImpl implements TransactionService {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
         }
 
-        Transaction transaction = new Transaction(tDTO.getCoinName(), tDTO.getQuantity(), tDTO.getPricePerUnit(),
-                tDTO.getTransactionDate(), tDTO.getFee(), tDTO.getNote(), portfolio);
+        try {
+            Transaction transaction = new Transaction(tDTO.getCoinName(), tDTO.getQuantity(), tDTO.getPricePerUnit(),
+                    tDTO.getTransactionDate(), tDTO.getFee(), tDTO.getNote(), portfolio);
 
-        return ResponseEntity.status(HttpStatus.CREATED).body(transactionToDTO(transactionRepository.save(transaction)));
+            Transaction savedTransaction = transactionRepository.save(transaction);
+            BigDecimal transactionPrice = savedTransaction.getPricePerUnit().multiply(savedTransaction.getQuantity())
+                    .subtract(savedTransaction.getFee());
+
+            portfolio.setTotalValue(portfolio.getTotalValue().add(transactionPrice));
+            portfolioRepository.save(portfolio);
+            return ResponseEntity.status(HttpStatus.CREATED).body(transactionToDTO(savedTransaction));
+        }
+        catch (Exception e) {
+            log.error("saveCurrentUserTransactionByPortfolioId: {}", e.getMessage());
+            throw new TransactionException("Could not save transaction");
+        }
     }
 
     @Override

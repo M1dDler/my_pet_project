@@ -3,24 +3,23 @@ package io.github.m1ddler.my_pet_project.dto;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
-import jakarta.validation.constraints.Min;
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.Positive;
+import jakarta.validation.constraints.*;
 
 public class TransactionDTO {
     private long id;
     @NotBlank(message = "Coin name cannot be empty or blank")
+    @Pattern(regexp = "[A-Z]{1,10}", message = "The name can have a maximum of 10 uppercase characters")
     private String coinName;
-    @NotNull(message = "Quantity of coins cannot be null")
+    @NotNull(message = "Quantity of coins cannot be empty")
     @Positive(message = "Quantity of coins must be positive")
     private BigDecimal quantity;
-    @NotNull(message = "Price per one coin cannot be null")
+    @NotNull(message = "Price per one coin cannot be empty")
     @Positive(message = "Price per one coin must be positive")
     private BigDecimal pricePerUnit;
-    @NotNull(message = "Transaction date cannot be null")
+    @NotNull(message = "Transaction date cannot be empty")
     private LocalDateTime transactionDate;
     @Min(value = 0, message = "Fee price cannot be lower 0")
+    @NotNull(message = "Fee cannot be empty")
     private BigDecimal fee;
     private String note;
 

@@ -1,0 +1,3 @@
+2025-06-16T13:32:09.887+03:00 INFO  --- [main] i.g.m.m.MyPetProjectApplication          : Starting MyPetProjectApplication using Java 17.0.15 with PID 15392 (<PROJECT_PATH>/target/classes started by user in <PROJECT_PATH>)
+2025-06-16T13:32:09.889+03:00 INFO  --- [main] i.g.m.m.MyPetProjectApplication          : No active profile set, falling back to 1 default profile: "default"
+...
