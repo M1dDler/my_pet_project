@@ -1,4 +1,4 @@
-package io.github.m1ddler.my_pet_project.exception_handling;
+package io.github.m1ddler.my_pet_project.exception_handler;
 
 import java.util.Map;
 

@@ -1,4 +1,4 @@
-package io.github.m1ddler.my_pet_project.service;
+package io.github.m1ddler.my_pet_project.service.impl;
 
 import io.github.m1ddler.my_pet_project.dao.TokenRepository;
 import io.github.m1ddler.my_pet_project.dao.UserRepository;
@@ -9,7 +9,9 @@ import io.github.m1ddler.my_pet_project.dto.UserDTO;
 import io.github.m1ddler.my_pet_project.entity.Role;
 import io.github.m1ddler.my_pet_project.entity.Token;
 import io.github.m1ddler.my_pet_project.entity.User;
-import io.github.m1ddler.my_pet_project.exception_handling.UserAlreadyExistsException;
+import io.github.m1ddler.my_pet_project.exception_handler.EntityAlreadyExistsException;
+import io.github.m1ddler.my_pet_project.service.interfaces.AuthenticationService;
+import io.github.m1ddler.my_pet_project.service.interfaces.JwtService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,6 +19,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -54,7 +57,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
     public ResponseEntity<UserDTO> register (RegistrationRequestDTO request) {
         if (userRepository.existsUserByUsername(request.getUsername()) ||
                 userRepository.existsUserByEmail(request.getEmail())) {
-            throw new UserAlreadyExistsException("User already exists");
+            throw new EntityAlreadyExistsException("User already exists");
         }
 
         User user = new User();
@@ -97,24 +100,29 @@ public class AuthenticationServiceImpl implements AuthenticationService {
 
     @Override
     public ResponseEntity<AuthenticationResponseDTO> authenticate(LoginRequestDTO request) {
-        User user = userRepository.findByUsername(request.getLogin())
-                .or(() -> userRepository.findByEmail(request.getLogin()))
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.UNAUTHORIZED));
+        try {
+            User user = userRepository.findByUsername(request.getLogin())
+                    .or(() -> userRepository.findByEmail(request.getLogin()))
+                    .orElseThrow(() -> new ResponseStatusException(HttpStatus.UNAUTHORIZED));
 
-        authenticationManager.authenticate(
-                new UsernamePasswordAuthenticationToken(
-                        user.getUsername(),
-                        request.getPassword()
-                )
-        );
+            authenticationManager.authenticate(
+                    new UsernamePasswordAuthenticationToken(
+                            user.getUsername(),
+                            request.getPassword()
+                    )
+            );
 
-        String accessToken = jwtService.generateAccessToken(user);
-        String refreshToken = jwtService.generateRefreshToken(user);
+            String accessToken = jwtService.generateAccessToken(user);
+            String refreshToken = jwtService.generateRefreshToken(user);
 
-        revokeAllToken(user);
-        saveUserToken(accessToken, refreshToken, user);
+            revokeAllToken(user);
+            saveUserToken(accessToken, refreshToken, user);
 
-        return ResponseEntity.status(HttpStatus.OK).body(new AuthenticationResponseDTO(accessToken, refreshToken));
+            return ResponseEntity.status(HttpStatus.OK).body(new AuthenticationResponseDTO(accessToken, refreshToken));
+        }
+        catch (BadCredentialsException ex) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
     }
 
     @Override

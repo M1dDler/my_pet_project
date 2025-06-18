@@ -1,10 +1,10 @@
-package io.github.m1ddler.my_pet_project.service;
+package io.github.m1ddler.my_pet_project.service.impl;
 
 import io.github.m1ddler.my_pet_project.dao.UserRepository;
 import io.github.m1ddler.my_pet_project.dto.UserDTO;
 import io.github.m1ddler.my_pet_project.entity.User;
-import io.github.m1ddler.my_pet_project.exception_handling.EmailAlreadyExistsException;
-import io.github.m1ddler.my_pet_project.exception_handling.UserAlreadyExistsException;
+import io.github.m1ddler.my_pet_project.exception_handler.EntityAlreadyExistsException;
+import io.github.m1ddler.my_pet_project.service.interfaces.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -13,7 +13,6 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
-import org.springframework.web.server.ResponseStatusException;
 
 @Service
 public class UserServiceImpl implements UserService {
@@ -38,7 +37,7 @@ public class UserServiceImpl implements UserService {
 
         if (!existingUser.getEmail().equalsIgnoreCase(userDTO.getEmail())) {
             if (userRepository.existsUserByEmail(userDTO.getEmail())) {
-                throw new EmailAlreadyExistsException("Email already exists");
+                throw new EntityAlreadyExistsException("Email already exists");
             }
             existingUser.setEmail(userDTO.getEmail());
             changed = true;
@@ -46,7 +45,7 @@ public class UserServiceImpl implements UserService {
 
         if (!existingUser.getUsername().equals(userDTO.getUsername())) {
             if (userRepository.existsUserByUsername(userDTO.getUsername())) {
-                throw new UserAlreadyExistsException("Username already exists");
+                throw new EntityAlreadyExistsException("A user with this username already exists");
             }
             existingUser.setUsername(userDTO.getUsername());
             changed = true;
@@ -73,10 +72,6 @@ public class UserServiceImpl implements UserService {
     @Override
     public User getAuthenticatedUser() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-
-        if (authentication == null || !authentication.isAuthenticated()) {
-            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED);
-        }
 
         String username = authentication.getName();
         return userRepository.findByUsername(username)

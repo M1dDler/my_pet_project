@@ -1,9 +1,9 @@
 package io.github.m1ddler.my_pet_project.config;
 
 import io.github.m1ddler.my_pet_project.filter.JwtFilter;
-import io.github.m1ddler.my_pet_project.handler.CustomAccessDeniedHandler;
-import io.github.m1ddler.my_pet_project.handler.CustomLogoutHandler;
-import io.github.m1ddler.my_pet_project.service.UserService;
+import io.github.m1ddler.my_pet_project.authentication_handler.CustomAccessDeniedHandler;
+import io.github.m1ddler.my_pet_project.authentication_handler.CustomLogoutHandler;
+import io.github.m1ddler.my_pet_project.service.interfaces.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -65,7 +65,7 @@ public class SecurityConfig {
                 .sessionManagement(session -> session.sessionCreationPolicy(STATELESS))
                 .addFilterBefore(jwtFIlter, UsernamePasswordAuthenticationFilter.class)
                 .logout(log -> {
-                    log.logoutUrl("/logout");
+                    log.logoutUrl("/api/v1/auth/logout");
                     log.addLogoutHandler(customLogoutHandler);
                     log.logoutSuccessHandler((request, response, authentication) ->
                             SecurityContextHolder.clearContext());

@@ -1,15 +1,14 @@
-package io.github.m1ddler.my_pet_project.service;
+package io.github.m1ddler.my_pet_project.service.impl;
 
 import io.github.m1ddler.my_pet_project.dao.PortfolioRepository;
-import io.github.m1ddler.my_pet_project.dao.UserRepository;
 import io.github.m1ddler.my_pet_project.dto.PortfolioDTO;
 import io.github.m1ddler.my_pet_project.entity.Portfolio;
-import io.github.m1ddler.my_pet_project.entity.User;
+import io.github.m1ddler.my_pet_project.service.interfaces.PortfolioService;
+import io.github.m1ddler.my_pet_project.service.interfaces.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
-import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
 

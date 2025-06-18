@@ -1,7 +1,8 @@
-package io.github.m1ddler.my_pet_project.service;
+package io.github.m1ddler.my_pet_project.service.impl;
 
 import io.github.m1ddler.my_pet_project.dao.TokenRepository;
 import io.github.m1ddler.my_pet_project.entity.User;
+import io.github.m1ddler.my_pet_project.service.interfaces.JwtService;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.JwtBuilder;
 import io.jsonwebtoken.JwtParserBuilder;
@@ -14,7 +15,6 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 
 import javax.crypto.SecretKey;
-import java.util.Arrays;
 import java.util.Date;
 import java.util.function.Function;
 

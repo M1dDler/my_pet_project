@@ -1,4 +1,4 @@
-package io.github.m1ddler.my_pet_project.handler;
+package io.github.m1ddler.my_pet_project.authentication_handler;
 
 import io.github.m1ddler.my_pet_project.dao.TokenRepository;
 import io.github.m1ddler.my_pet_project.entity.Token;

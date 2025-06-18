@@ -1,4 +1,4 @@
-package io.github.m1ddler.my_pet_project.service;
+package io.github.m1ddler.my_pet_project.service.interfaces;
 
 import io.github.m1ddler.my_pet_project.entity.User;
 import io.jsonwebtoken.Claims;

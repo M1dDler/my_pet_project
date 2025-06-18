@@ -1,16 +1,18 @@
 package io.github.m1ddler.my_pet_project.controller;
 
 import io.github.m1ddler.my_pet_project.dto.PortfolioDTO;
-import io.github.m1ddler.my_pet_project.service.PortfolioService;
+import io.github.m1ddler.my_pet_project.service.interfaces.PortfolioService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
 @RestController
 @RequestMapping("/api/v1/users/me")
+@PreAuthorize("hasAnyRole('USER', 'ADMIN')")
 public class PortfolioController {
     private final PortfolioService portfolioService;
 

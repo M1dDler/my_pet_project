@@ -1,4 +1,4 @@
-package io.github.m1ddler.my_pet_project.handler;
+package io.github.m1ddler.my_pet_project.authentication_handler;
 
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;

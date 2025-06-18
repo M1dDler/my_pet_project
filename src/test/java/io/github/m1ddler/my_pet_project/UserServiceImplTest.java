@@ -1,25 +1,7 @@
 package io.github.m1ddler.my_pet_project;
 
-import io.github.m1ddler.my_pet_project.dao.UserRepository;
-import io.github.m1ddler.my_pet_project.dto.UserDTO;
-import io.github.m1ddler.my_pet_project.entity.User;
-import io.github.m1ddler.my_pet_project.exception_handling.EmailAlreadyExistsException;
-import io.github.m1ddler.my_pet_project.service.UserServiceImpl;
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.server.ResponseStatusException;
-
-import java.util.List;
-import java.util.Optional;
-
-import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
 
 //public class UserServiceImplTest {
 //    @Mock
