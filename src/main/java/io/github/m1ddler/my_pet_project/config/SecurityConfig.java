@@ -52,9 +52,10 @@ public class SecurityConfig {
         http.csrf(AbstractHttpConfigurer::disable);
 
         http.authorizeHttpRequests(auth -> {
-                    auth.requestMatchers("/api/v1/auth/login/**","/api/v1/auth/register/**", "/css/**", "/api/v1/auth/refresh_token/**", "/")
+                    auth.requestMatchers("/api/v1/auth/login","/api/v1/auth/register", "/api/v1/auth/refresh_token")
                             .permitAll();
-                    auth.requestMatchers("/admin/**").hasAuthority("ADMIN");
+                    auth.requestMatchers("/api/v1/users/**").hasAnyAuthority("USER", "ADMIN");
+                    auth.requestMatchers("/api/v1/admin/**").hasAuthority("ADMIN");
                     auth.anyRequest().authenticated();
                 })
                 .userDetailsService(userService)

@@ -1,11 +1,8 @@
 package io.github.m1ddler.my_pet_project.dto;
 
-import io.github.m1ddler.my_pet_project.entity.Portfolio;
 import io.github.m1ddler.my_pet_project.entity.Role;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
-
-import java.util.List;
 
 public class UserDTO {
     private final long id;

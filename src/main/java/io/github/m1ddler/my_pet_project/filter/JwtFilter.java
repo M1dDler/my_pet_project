@@ -2,6 +2,8 @@ package io.github.m1ddler.my_pet_project.filter;
 
 import io.github.m1ddler.my_pet_project.service.interfaces.JwtService;
 import io.github.m1ddler.my_pet_project.service.interfaces.UserService;
+import io.jsonwebtoken.ExpiredJwtException;
+import io.jsonwebtoken.security.SignatureException;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -71,20 +73,11 @@ public class JwtFilter extends OncePerRequestFilter {
             filterChain.doFilter(request, response);
 
         }
-        catch (io.jsonwebtoken.ExpiredJwtException e) {
+        catch (ExpiredJwtException | SignatureException e) {
             response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-            response.setContentType("application/json");
-            response.getWriter().write("{\"error\": \"JWT token has expired\"}");
-        }
-        catch (io.jsonwebtoken.security.SignatureException e) {
-            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-            response.setContentType("application/json");
-            response.getWriter().write("{\"error\": \"Invalid JWT token\"}");
         }
         catch (Exception e) {
             response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
-            response.setContentType("application/json");
-            response.getWriter().write("{\"error\": \"Internal error during token validation\"}");
         }
     }
 }
