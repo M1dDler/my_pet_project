@@ -1,37 +1,45 @@
 HELP.md
-target/
-!.mvn/wrapper/maven-wrapper.jar
-!**/src/main/**/target/
-!**/src/test/**/target/
+
+# Maven (Backend)
+my_pet_project_backend/target/
+!my_pet_project_backend/.mvn/wrapper/maven-wrapper.jar
+!my_pet_project_backend/**/src/main/**/target/
+!my_pet_project_backend/**/src/test/**/target/
 
 ### STS ###
-.apt_generated
-.classpath
-.factorypath
-.project
-.settings
-.springBeans
-.sts4-cache
+my_pet_project_backend/.apt_generated
+my_pet_project_backend/.classpath
+my_pet_project_backend/.factorypath
+my_pet_project_backend/.project
+my_pet_project_backend/.settings
+my_pet_project_backend/.springBeans
+my_pet_project_backend/.sts4-cache
 
 ### IntelliJ IDEA ###
-.idea
-*.iws
-*.iml
-*.ipr
+my_pet_project_backend/.idea
+my_pet_project_backend/*.iws
+my_pet_project_backend/*.iml
+my_pet_project_backend/*.ipr
 
 ### NetBeans ###
-/nbproject/private/
-/nbbuild/
-/dist/
-/nbdist/
-/.nb-gradle/
-build/
-!**/src/main/**/build/
-!**/src/test/**/build/
+my_pet_project_backend/nbproject/private/
+my_pet_project_backend/nbbuild/
+my_pet_project_backend/dist/
+my_pet_project_backend/nbdist/
+my_pet_project_backend/.nb-gradle/
+my_pet_project_backend/build/
+!my_pet_project_backend/**/src/main/**/build/
+!my_pet_project_backend/**/src/test/**/build/
 
 ### VS Code ###
-.vscode/
+my_pet_project_backend/.vscode/
+my_pet_project_frontend/.vscode/
 
 ### Custom ###
-.env
-logs/
+my_pet_project_backend/.env
+my_pet_project_backend/logs/
+my_pet_project_frontend/.env
+my_pet_project_frontend/.next/
+my_pet_project_frontend/node_modules/
+my_pet_project_frontend/out/
+my_pet_project_frontend/.turbo/
