@@ -1,9 +1,6 @@
 package io.github.m1ddler.my_pet_project.controller;
 
-import io.github.m1ddler.my_pet_project.dto.AuthenticationResponseDTO;
-import io.github.m1ddler.my_pet_project.dto.LoginRequestDTO;
-import io.github.m1ddler.my_pet_project.dto.RegistrationRequestDTO;
-import io.github.m1ddler.my_pet_project.dto.UserDTO;
+import io.github.m1ddler.my_pet_project.dto.*;
 import io.github.m1ddler.my_pet_project.service.interfaces.AuthenticationService;
 import io.github.m1ddler.my_pet_project.service.interfaces.UserService;
 import jakarta.servlet.http.HttpServletRequest;
@@ -38,7 +35,7 @@ public class AuthenticationController {
     }
 
     @PostMapping("/refresh_token")
-    public ResponseEntity<AuthenticationResponseDTO> refreshToken(
+    public ResponseEntity<RefreshTokenResponseDTO> refreshToken(
             HttpServletRequest request,
             HttpServletResponse response) {
 

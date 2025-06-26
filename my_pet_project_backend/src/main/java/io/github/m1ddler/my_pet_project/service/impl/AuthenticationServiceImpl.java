@@ -1,11 +1,9 @@
 package io.github.m1ddler.my_pet_project.service.impl;
 
+import io.github.m1ddler.my_pet_project.config.JwtProperties;
 import io.github.m1ddler.my_pet_project.dao.TokenRepository;
 import io.github.m1ddler.my_pet_project.dao.UserRepository;
-import io.github.m1ddler.my_pet_project.dto.AuthenticationResponseDTO;
-import io.github.m1ddler.my_pet_project.dto.LoginRequestDTO;
-import io.github.m1ddler.my_pet_project.dto.RegistrationRequestDTO;
-import io.github.m1ddler.my_pet_project.dto.UserDTO;
+import io.github.m1ddler.my_pet_project.dto.*;
 import io.github.m1ddler.my_pet_project.entity.Role;
 import io.github.m1ddler.my_pet_project.entity.Token;
 import io.github.m1ddler.my_pet_project.entity.User;
@@ -26,31 +24,33 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @Service
 public class AuthenticationServiceImpl implements AuthenticationService {
     private final UserRepository userRepository;
-
     private final JwtService jwtService;
-
     private final PasswordEncoder passwordEncoder;
-
     private final AuthenticationManager authenticationManager;
-
     private final TokenRepository tokenRepository;
+    private final JwtProperties jwtProperties;
 
     @Autowired
     public AuthenticationServiceImpl(UserRepository userRepository,
                                  JwtService jwtService,
                                  PasswordEncoder passwordEncoder,
                                  AuthenticationManager authenticationManager,
-                                 TokenRepository tokenRepository) {
+                                 TokenRepository tokenRepository,
+                                 JwtProperties jwtProperties) {
         this.userRepository = userRepository;
         this.jwtService = jwtService;
         this.passwordEncoder = passwordEncoder;
         this.authenticationManager = authenticationManager;
         this.tokenRepository = tokenRepository;
+        this.jwtProperties = jwtProperties;
     }
 
     @Override
@@ -84,7 +84,6 @@ public class AuthenticationServiceImpl implements AuthenticationService {
                 t.setLoggedOut(true);
             });
         }
-
         tokenRepository.saveAll(validTokens);
     }
 
@@ -103,7 +102,11 @@ public class AuthenticationServiceImpl implements AuthenticationService {
         try {
             User user = userRepository.findByUsername(request.getLogin())
                     .or(() -> userRepository.findByEmail(request.getLogin()))
-                    .orElseThrow(() -> new ResponseStatusException(HttpStatus.UNAUTHORIZED));
+                    .orElse(null);
+
+            if (user == null) {
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+            }
 
             authenticationManager.authenticate(
                     new UsernamePasswordAuthenticationToken(
@@ -112,13 +115,20 @@ public class AuthenticationServiceImpl implements AuthenticationService {
                     )
             );
 
-            String accessToken = jwtService.generateAccessToken(user);
-            String refreshToken = jwtService.generateRefreshToken(user);
+            long dateNow = System.currentTimeMillis();
+            Date issuedAt = new Date(dateNow);
+            Date accessTokenExpiresAt = new Date(dateNow + jwtProperties.getAccessTokenExpiration());
+            Date refreshTokenExpiresAt = new Date(dateNow + jwtProperties.getRefreshTokenExpiration());
+
+            String accessToken = jwtService.generateAccessToken(user, issuedAt, accessTokenExpiresAt);
+            String refreshToken = jwtService.generateRefreshToken(user, issuedAt, refreshTokenExpiresAt);
 
             revokeAllToken(user);
             saveUserToken(accessToken, refreshToken, user);
 
-            return ResponseEntity.status(HttpStatus.OK).body(new AuthenticationResponseDTO(accessToken, refreshToken));
+            return ResponseEntity.status(HttpStatus.OK).body(new AuthenticationResponseDTO(
+                    accessToken, refreshToken, accessTokenExpiresAt, refreshTokenExpiresAt
+            ));
         }
         catch (BadCredentialsException ex) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
@@ -126,7 +136,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
     }
 
     @Override
-    public ResponseEntity<AuthenticationResponseDTO> refreshToken(HttpServletRequest request, HttpServletResponse response) {
+    public ResponseEntity<RefreshTokenResponseDTO> refreshToken(HttpServletRequest request, HttpServletResponse response) {
         String authorizationHeader = request.getHeader(HttpHeaders.AUTHORIZATION);
 
         if (authorizationHeader == null || !authorizationHeader.startsWith("Bearer ")) {
@@ -141,17 +151,19 @@ public class AuthenticationServiceImpl implements AuthenticationService {
 
         if (jwtService.isValidRefresh(token, user)) {
 
-            String accessToken = jwtService.generateAccessToken(user);
-            String refreshToken = jwtService.generateRefreshToken(user);
+            long dateNow = System.currentTimeMillis();
+            Date issuedAt = new Date(dateNow);
+            Date accessTokenExpiresAt = new Date(dateNow + jwtProperties.getAccessTokenExpiration());
+
+            String accessToken = jwtService.generateAccessToken(user, issuedAt, accessTokenExpiresAt);
 
             revokeAllToken(user);
 
-            saveUserToken(accessToken, refreshToken, user);
+            saveUserToken(accessToken, token, user);
 
-            return new ResponseEntity<>(new AuthenticationResponseDTO(accessToken, refreshToken), HttpStatus.OK);
+            return new ResponseEntity<>(new RefreshTokenResponseDTO(accessToken, accessTokenExpiresAt), HttpStatus.OK);
 
         }
-
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
     }
 }
