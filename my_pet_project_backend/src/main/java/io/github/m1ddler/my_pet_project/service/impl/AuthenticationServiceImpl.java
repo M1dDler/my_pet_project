@@ -12,6 +12,7 @@ import io.github.m1ddler.my_pet_project.service.interfaces.AuthenticationService
 import io.github.m1ddler.my_pet_project.service.interfaces.JwtService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -76,18 +77,6 @@ public class AuthenticationServiceImpl implements AuthenticationService {
     }
 
     @Override
-    public void revokeAllToken(User user) {
-        List<Token> validTokens = tokenRepository.findAllAccessTokenByUser(user.getId());
-
-        if(!validTokens.isEmpty()){
-            validTokens.forEach(t ->{
-                t.setLoggedOut(true);
-            });
-        }
-        tokenRepository.saveAll(validTokens);
-    }
-
-    @Override
     public void saveUserToken(String accessToken, String refreshToken, User user) {
         Token token = new Token();
         token.setAccessToken(accessToken);
@@ -97,6 +86,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
         tokenRepository.save(token);
     }
 
+    @Transactional
     @Override
     public ResponseEntity<AuthenticationResponseDTO> authenticate(LoginRequestDTO request) {
         try {
@@ -123,7 +113,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
             String accessToken = jwtService.generateAccessToken(user, issuedAt, accessTokenExpiresAt);
             String refreshToken = jwtService.generateRefreshToken(user, issuedAt, refreshTokenExpiresAt);
 
-            revokeAllToken(user);
+            tokenRepository.deleteAllByUserId(user.getId());
             saveUserToken(accessToken, refreshToken, user);
 
             return ResponseEntity.status(HttpStatus.OK).body(new AuthenticationResponseDTO(
@@ -135,6 +125,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
         }
     }
 
+    @Transactional
     @Override
     public ResponseEntity<RefreshTokenResponseDTO> refreshToken(HttpServletRequest request, HttpServletResponse response) {
         String authorizationHeader = request.getHeader(HttpHeaders.AUTHORIZATION);
@@ -157,8 +148,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
 
             String accessToken = jwtService.generateAccessToken(user, issuedAt, accessTokenExpiresAt);
 
-            revokeAllToken(user);
-
+            tokenRepository.deleteAllByUserId(user.getId());
             saveUserToken(accessToken, token, user);
 
             return new ResponseEntity<>(new RefreshTokenResponseDTO(accessToken, accessTokenExpiresAt), HttpStatus.OK);

@@ -10,6 +10,7 @@ type TokensResponse = {
 
 async function refreshAccessToken(refreshToken: string): Promise<TokensResponse | null> {
   try {
+    console.log(`refreshToken : ${refreshToken}`)
     const refreshedTokens = await ky
       .post("http://localhost:8080/api/v1/auth/refresh_token", {
         headers: {
@@ -84,6 +85,9 @@ export const authOptions = {
         token.refreshTokenExpiresAt = user.refreshTokenExpiresAt;
         token.accessTokenExpiresAt = user.accessTokenExpiresAt;
       }
+      
+      // console.log(`refreshTokenExpiresAt : ${token.refreshTokenExpiresAt}`)
+      // console.log(`accessTokenExpiresAt : ${token.accessTokenExpiresAt}`)
 
       if (token.refreshTokenExpiresAt) {
           const expiresAt = new Date(token.refreshTokenExpiresAt);
@@ -98,13 +102,10 @@ export const authOptions = {
         const expiresAt = new Date(token.accessTokenExpiresAt).getTime();
         const now = Date.now();
         const bufferTime = 60 * 1000;
-
-        console.log(`BufferTime: ${bufferTime}`);
-        console.log(`ExpiresAt: ${expiresAt}`);
       
         if (now + bufferTime > expiresAt) {
           const refreshedAccessToken = await refreshAccessToken(token.refreshToken)
-          console.log(`refreshedAccessToken: ${refreshedAccessToken}`);
+          
           if (refreshedAccessToken === null){
             return {};
           }
