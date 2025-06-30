@@ -23,12 +23,6 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
-import org.springframework.web.server.ResponseStatusException;
-
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 
 @Service
 public class AuthenticationServiceImpl implements AuthenticationService {
@@ -37,21 +31,18 @@ public class AuthenticationServiceImpl implements AuthenticationService {
     private final PasswordEncoder passwordEncoder;
     private final AuthenticationManager authenticationManager;
     private final TokenRepository tokenRepository;
-    private final JwtProperties jwtProperties;
 
     @Autowired
     public AuthenticationServiceImpl(UserRepository userRepository,
                                  JwtService jwtService,
                                  PasswordEncoder passwordEncoder,
                                  AuthenticationManager authenticationManager,
-                                 TokenRepository tokenRepository,
-                                 JwtProperties jwtProperties) {
+                                 TokenRepository tokenRepository) {
         this.userRepository = userRepository;
         this.jwtService = jwtService;
         this.passwordEncoder = passwordEncoder;
         this.authenticationManager = authenticationManager;
         this.tokenRepository = tokenRepository;
-        this.jwtProperties = jwtProperties;
     }
 
     @Override
@@ -105,20 +96,13 @@ public class AuthenticationServiceImpl implements AuthenticationService {
                     )
             );
 
-            long dateNow = System.currentTimeMillis();
-            Date issuedAt = new Date(dateNow);
-            Date accessTokenExpiresAt = new Date(dateNow + jwtProperties.getAccessTokenExpiration());
-            Date refreshTokenExpiresAt = new Date(dateNow + jwtProperties.getRefreshTokenExpiration());
-
-            String accessToken = jwtService.generateAccessToken(user, issuedAt, accessTokenExpiresAt);
-            String refreshToken = jwtService.generateRefreshToken(user, issuedAt, refreshTokenExpiresAt);
+            String accessToken = jwtService.generateAccessToken(user);
+            String refreshToken = jwtService.generateRefreshToken(user);
 
             tokenRepository.deleteAllByUserId(user.getId());
             saveUserToken(accessToken, refreshToken, user);
 
-            return ResponseEntity.status(HttpStatus.OK).body(new AuthenticationResponseDTO(
-                    accessToken, refreshToken, accessTokenExpiresAt, refreshTokenExpiresAt
-            ));
+            return ResponseEntity.status(HttpStatus.OK).body(new AuthenticationResponseDTO(accessToken, refreshToken));
         }
         catch (BadCredentialsException ex) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
@@ -142,16 +126,12 @@ public class AuthenticationServiceImpl implements AuthenticationService {
 
         if (jwtService.isValidRefresh(token, user)) {
 
-            long dateNow = System.currentTimeMillis();
-            Date issuedAt = new Date(dateNow);
-            Date accessTokenExpiresAt = new Date(dateNow + jwtProperties.getAccessTokenExpiration());
-
-            String accessToken = jwtService.generateAccessToken(user, issuedAt, accessTokenExpiresAt);
+            String accessToken = jwtService.generateAccessToken(user);
 
             tokenRepository.deleteAllByUserId(user.getId());
             saveUserToken(accessToken, token, user);
 
-            return new ResponseEntity<>(new RefreshTokenResponseDTO(accessToken, accessTokenExpiresAt), HttpStatus.OK);
+            return ResponseEntity.status(HttpStatus.OK).body(new RefreshTokenResponseDTO(accessToken));
 
         }
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();

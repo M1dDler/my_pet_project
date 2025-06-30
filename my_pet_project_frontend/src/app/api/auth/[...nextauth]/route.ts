@@ -1,41 +1,56 @@
 import NextAuth from "next-auth/next";
 import CredentialsProvider from "next-auth/providers/credentials";
 import ky from "ky";
+import { jwtDecode } from "jwt-decode";
 
 
-type TokensResponse = {
-  accessToken: string;
-  accessTokenExpiresAt: string;
-};
+interface JwtPayload {
+  exp: number;
+  iat?: number;
+  sub?: string;
+  [key: string]: any;
+}
 
-async function refreshAccessToken(refreshToken: string): Promise<TokensResponse | null> {
+export function getTokenExpirationDate(token: string): Date | null {
   try {
-    console.log(`refreshToken : ${refreshToken}`)
-    const refreshedTokens = await ky
-      .post("http://localhost:8080/api/v1/auth/refresh_token", {
-        headers: {
-          Authorization: `Bearer ${refreshToken}`,
-        },
-        throwHttpErrors: false,
-      })
-      .json<TokensResponse>();
+    const decoded = jwtDecode<JwtPayload>(token);
+    if (!decoded.exp) return null;
+    return new Date(decoded.exp * 1000);
+  } catch (e) {
+    console.error("Invalid token", e);
+    return null;
+  }
+}
 
-    console.log(`refreshedTokens: ${refreshedTokens}`)
+interface TokensResponse {
+  accessToken: string;
+}
 
-    if (!refreshedTokens.accessToken) {
+async function refreshAccessToken(refreshToken: string): Promise<string | null> {
+  try {
+    console.log(`refreshToken : ${refreshToken}`);
+
+    const response = await ky.post("http://localhost:8080/api/v1/auth/refresh_token", {
+      headers: {
+        Authorization: `Bearer ${refreshToken}`,
+      },
+      throwHttpErrors: false,
+    });
+
+    const data = await response.json<TokensResponse>();
+
+    console.log("refreshedToken :", data.accessToken);
+
+    if (!data.accessToken) {
       throw new Error("Failed to refresh access token");
     }
 
-    return {
-      accessToken: refreshedTokens.accessToken,
-      accessTokenExpiresAt: refreshedTokens.accessTokenExpiresAt,
-    };
+    return data.accessToken;
 
   } catch (error) {
     console.error("Error refreshing access token:", error);
     return null;
   }
-
 }
 
 export const authOptions = {
@@ -82,12 +97,12 @@ export const authOptions = {
       if (user) {
         token.accessToken = user.accessToken;
         token.refreshToken = user.refreshToken;
-        token.refreshTokenExpiresAt = user.refreshTokenExpiresAt;
-        token.accessTokenExpiresAt = user.accessTokenExpiresAt;
+        token.refreshTokenExpiresAt = getTokenExpirationDate(user.refreshToken);
+        token.accessTokenExpiresAt = getTokenExpirationDate(user.accessToken);
       }
       
-      // console.log(`refreshTokenExpiresAt : ${token.refreshTokenExpiresAt}`)
-      // console.log(`accessTokenExpiresAt : ${token.accessTokenExpiresAt}`)
+      console.log(`refreshTokenExpiresAt : ${token.refreshTokenExpiresAt}`)
+      console.log(`accessTokenExpiresAt : ${token.accessTokenExpiresAt}`)
 
       if (token.refreshTokenExpiresAt) {
           const expiresAt = new Date(token.refreshTokenExpiresAt);
@@ -109,8 +124,8 @@ export const authOptions = {
           if (refreshedAccessToken === null){
             return {};
           }
-          token.accessToken = refreshedAccessToken.accessToken;
-          token.accessTokenExpiresAt = refreshedAccessToken.accessTokenExpiresAt;
+          token.accessToken = refreshedAccessToken;
+          token.accessTokenExpiresAt = getTokenExpirationDate(refreshedAccessToken);
         }
       }
       return token;

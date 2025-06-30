@@ -1,21 +1,25 @@
 "use client";
-
-// biome-ignore assist/source/organizeImports :D
 import { useEffect, useState } from "react";
 import { useSession } from "next-auth/react";
 import ky from "ky";
 import { useRouter } from "next/navigation";
 
+interface User {
+  id: number;
+  username: string;
+  email: string;
+}
+
 export default function UserPage() {
   const { data: session, status } = useSession();
   const router = useRouter();
 
-  const [jsonData, setJsonData] = useState<any>(null);
+  const [jsonData, setJsonData] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    if (status === "loading") { 
+    if (status === "loading") {
       return;
     }
 
@@ -34,7 +38,7 @@ export default function UserPage() {
         if (!response.ok) {
           throw new Error("Помилка завантаження");
         }
-        const data = await response.json();
+        const data = (await response.json()) as User;
         setJsonData(data);
       })
       .catch(() => setError("Не вдалося отримати дані"))

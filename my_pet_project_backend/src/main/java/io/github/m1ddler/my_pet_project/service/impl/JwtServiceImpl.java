@@ -31,13 +31,13 @@ public class JwtServiceImpl implements JwtService {
 
 
     @Override
-    public String generateAccessToken(User user, Date issueAt, Date accessTokenExpiresAt) {
-        return generateToken(user, issueAt, accessTokenExpiresAt);
+    public String generateAccessToken(User user) {
+        return generateToken(user, jwtProperties.getAccessTokenExpiration());
     }
 
     @Override
-    public String generateRefreshToken(User user, Date issueAt, Date refreshTokenExpiresAt) {
-        return generateToken(user, issueAt, refreshTokenExpiresAt);
+    public String generateRefreshToken(User user) {
+        return generateToken(user, jwtProperties.getRefreshTokenExpiration());
     }
 
     @Override
@@ -78,11 +78,11 @@ public class JwtServiceImpl implements JwtService {
         return Keys.hmacShaKeyFor(keyBytes);
     }
 
-    private String generateToken(User user, Date issueAt, Date tokenExpiresAt) {
+    private String generateToken(User user, long timeExpiration) {
         JwtBuilder builder = Jwts.builder()
                 .subject(user.getUsername())
-                .issuedAt(issueAt)
-                .expiration(tokenExpiresAt)
+                .issuedAt(new Date(System.currentTimeMillis()))
+                .expiration(new Date(System.currentTimeMillis() + timeExpiration))
                 .signWith(getSigningKey());
         return builder.compact();
     }
