@@ -19,7 +19,7 @@ export default function RootLayout({
     <html lang="en">
       <body className={twMerge(GeistSans.className, "antialiased")}>
         <SessionProviderWrapper>
-        {children}
+          {children}
         </SessionProviderWrapper>
       </body>
     </html>
