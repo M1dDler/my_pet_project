@@ -8,7 +8,7 @@ interface JwtPayload {
   exp: number;
   iat?: number;
   sub?: string;
-  [key: string]: any;
+  [key: string]: unknown;
 }
 
 export function getTokenExpirationDate(token: string): Date | null {
@@ -16,8 +16,7 @@ export function getTokenExpirationDate(token: string): Date | null {
     const decoded = jwtDecode<JwtPayload>(token);
     if (!decoded.exp) return null;
     return new Date(decoded.exp * 1000);
-  } catch (e) {
-    console.error("Invalid token", e);
+  } catch (_) {
     return null;
   }
 }
@@ -28,8 +27,6 @@ interface TokensResponse {
 
 async function refreshAccessToken(refreshToken: string): Promise<string | null> {
   try {
-    console.log(`refreshToken : ${refreshToken}`);
-
     const response = await ky.post("http://localhost:8080/api/v1/auth/refresh_token", {
       headers: {
         Authorization: `Bearer ${refreshToken}`,
@@ -39,16 +36,13 @@ async function refreshAccessToken(refreshToken: string): Promise<string | null> 
 
     const data = await response.json<TokensResponse>();
 
-    console.log("refreshedToken :", data.accessToken);
-
     if (!data.accessToken) {
       throw new Error("Failed to refresh access token");
     }
 
     return data.accessToken;
 
-  } catch (error) {
-    console.error("Error refreshing access token:", error);
+  } catch (_) {
     return null;
   }
 }
@@ -99,10 +93,13 @@ export const authOptions = {
         token.refreshToken = user.refreshToken;
         token.refreshTokenExpiresAt = getTokenExpirationDate(user.refreshToken);
         token.accessTokenExpiresAt = getTokenExpirationDate(user.accessToken);
+        token.user = {
+          id: user.userDTO.id,
+          role: user.userDTO.role,
+          name: user.userDTO.username,
+          email: user.userDTO.email
+        };
       }
-      
-      console.log(`refreshTokenExpiresAt : ${token.refreshTokenExpiresAt}`)
-      console.log(`accessTokenExpiresAt : ${token.accessTokenExpiresAt}`)
 
       if (token.refreshTokenExpiresAt) {
           const expiresAt = new Date(token.refreshTokenExpiresAt);
@@ -133,6 +130,9 @@ export const authOptions = {
 
     session({ session, token }) {
       session.accessToken = token.accessToken;
+      session.user.id = token.user.id;
+      session.user.email = token.user.email;
+      session.user.name = token.user.name;
       return session;
     },
   },

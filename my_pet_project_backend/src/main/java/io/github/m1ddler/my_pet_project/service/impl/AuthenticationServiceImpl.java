@@ -102,7 +102,13 @@ public class AuthenticationServiceImpl implements AuthenticationService {
             tokenRepository.deleteAllByUserId(user.getId());
             saveUserToken(accessToken, refreshToken, user);
 
-            return ResponseEntity.status(HttpStatus.OK).body(new AuthenticationResponseDTO(accessToken, refreshToken));
+            return ResponseEntity.status(HttpStatus.OK).body(
+                    new AuthenticationResponseDTO(
+                            accessToken,
+                            refreshToken,
+                            new UserDTO(user.getId(), user.getRole(), user.getUsername(), user.getEmail())
+                    )
+            );
         }
         catch (BadCredentialsException ex) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();

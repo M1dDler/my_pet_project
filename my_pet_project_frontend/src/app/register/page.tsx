@@ -5,6 +5,9 @@ import { useRouter } from "next/navigation";
 import { Toast } from "@/components/Toast";
 import Navbar from "@/components/Navbar";
 import { signIn } from "next-auth/react";
+import { useSession } from "next-auth/react";
+import { useEffect } from "react";
+import LoadingSpinner from "@/components/LoadingSpinner";
 
 export default function RegisterPage() {
     const router = useRouter();
@@ -18,6 +21,21 @@ export default function RegisterPage() {
     const [isProcessing, setIsProcessing] = useState(false);
     const [errorMessage, setErrorMessage] = useState("");
     const [showToast, setShowToast] = useState(false);
+    const { data: session, status } = useSession();
+    const [ loading, setLoading ] = useState(true)
+
+    useEffect(() => {
+        if (status === "loading") return;
+        if (session?.accessToken) {
+          router.push("/users/me");
+          return;
+        }
+        setLoading(false);
+      }, [status, session, router]);
+    
+      if (loading || status === "loading") {
+        return <LoadingSpinner />;
+      }
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();

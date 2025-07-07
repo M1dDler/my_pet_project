@@ -5,6 +5,9 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { Toast } from "@/components/Toast";
 import Navbar from "@/components/Navbar";
+import { useSession } from "next-auth/react";
+import { useEffect } from "react";
+import LoadingSpinner from "@/components/LoadingSpinner";
 
 export default function LoginPage() {
   const [login, setLogin] = useState("");
@@ -13,6 +16,21 @@ export default function LoginPage() {
   const [isProcessing, setIsProcessing] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
   const [showToast, setShowToast] = useState(false);
+  const { data: session, status } = useSession();
+  const [ loading, setLoading ] = useState(true)
+
+  useEffect(() => {
+    if (status === "loading") return;
+    if (session?.accessToken) {
+      router.push("/users/me");
+      return;
+    }
+    setLoading(false);
+  }, [status, session, router]);
+
+  if (loading || status === "loading") {
+    return <LoadingSpinner />;
+  }
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -45,10 +63,9 @@ export default function LoginPage() {
 
   return (
     <div>
-      {showToast && <Toast type="error" message={errorMessage} onClose={() => setShowToast(false)} />}
-
       <div className="flex min-h-screen flex-col bg-[#1a1a1a]">
         <Navbar />
+        {showToast && <Toast type="error" message={errorMessage} onClose={() => setShowToast(false)} />}
         <main className="flex grow items-center justify-center px-4" style={{
           backgroundImage: 'url("/login/background.jpg")',
           backgroundSize: "cover",

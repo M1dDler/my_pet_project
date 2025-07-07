@@ -1,19 +1,46 @@
+/** biome-ignore-all lint/performance/noImgElement: <explanation> **/
 'use client';
 
 import Image from 'next/image';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
+import { useSession, signOut } from "next-auth/react";
+import { useState, useRef, useEffect } from 'react';
+import clsx from 'clsx';
+import { ArrowRightIcon } from '@heroicons/react/24/outline';
+import {
+    UserIcon,
+    PencilSquareIcon,
+    EnvelopeIcon,
+    Cog8ToothIcon,
+    QuestionMarkCircleIcon
+} from '@heroicons/react/24/outline';
+
 
 export default function Navbar() {
     const pathname = usePathname();
+    const { data: session } = useSession();
+    const [open, setOpen] = useState(false);
+    const userEmail = session?.user?.email || 'Profile menu';
+    const menuRef = useRef<HTMLDivElement>(null);
 
-    // const navItems = ["Home", "Team", "Feature", "Blog", "About", "Contact"];
+    const navItems = ["Home", "Team", "Feature", "Blog", "About", "Contact"];
 
     const isLoginPage = pathname === '/login';
     const isRegisterPage = pathname === '/register';
 
+    useEffect(() => {
+        const handler = (e: MouseEvent) => {
+            if (menuRef.current && !menuRef.current.contains(e.target as Node)) {
+                setOpen(false);
+            }
+        };
+        document.addEventListener('mousedown', handler);
+        return () => document.removeEventListener('mousedown', handler);
+    }, []);
+
     return (
-        <header className="relative z-50 flex min-h-[70px] bg-[#121212] px-4 py-4 tracking-wide shadow-md sm:px-10">
+        <header className="relative z-50 flex min-h-[70px] border-gray-700 border-b bg-[#121212] px-4 py-4 tracking-wide shadow-md sm:px-10">
             <div className="flex w-full flex-wrap items-center justify-between gap-5">
 
                 <Link href="/" className="flex items-center space-x-2 max-sm:hidden">
@@ -90,7 +117,7 @@ export default function Navbar() {
                                         />
                                     </Link>
                                 </li>
-                                {/* {navItems.map((text) => {
+                                {navItems.map((text) => {
                                     const href = text === "Home" ? "/" : `/${text.toLowerCase()}`;
                                     const isActive = pathname === href;
 
@@ -101,36 +128,112 @@ export default function Navbar() {
                                         >
                                             <Link
                                                 href={href}
-                                                className={`block font-medium text-[15px] hover:text-blue-400 ${isActive ? "text-blue-400" : "text-gray-300"
+                                                className={`block font-medium text-[15px] hover:text-blue-300 ${isActive ? "text-blue-400" : "text-gray-300"
                                                     }`}
                                             >
                                                 {text}
                                             </Link>
                                         </li>
                                     );
-                                })} */}
+                                })}
                             </ul>
                         </nav>
+                        {!session ? (
+                            <div className="flex space-x-4 max-lg:ml-auto">
+                                <Link href="/login" passHref>
+                                    <button
+                                        type="button"
+                                        className="cursor-pointer rounded-full border border-gray-600 bg-transparent px-4 py-2 font-medium text-gray-300 text-sm tracking-wide transition-all hover:bg-gray-700"
+                                    >
+                                        Login
+                                    </button>
+                                </Link>
 
-                        <div className="flex space-x-4 max-lg:ml-auto">
-                            <Link href="/login" passHref>
+                                <Link href="/register">
+                                    <button
+                                        type="button"
+                                        className="cursor-pointer rounded-full border border-blue-500 bg-blue-600 px-4 py-2 font-medium text-sm text-white tracking-wide transition-all hover:bg-blue-700"
+                                    >
+                                        Sign up
+                                    </button>
+                                </Link>
+                            </div>
+                        ) : (
+                            <div className="relative ml-auto inline-block text-left" ref={menuRef}>
                                 <button
                                     type="button"
-                                    className="cursor-pointer rounded-full border border-gray-600 bg-transparent px-4 py-2 font-medium text-gray-300 text-sm tracking-wide transition-all hover:bg-gray-700"
+                                    className="relative flex cursor-pointer items-center rounded-full px-1.5 py-1.5 text-sm text-white transition-colors duration-300 hover:bg-gray-700"
+                                    id="user-menu-button"
+                                    aria-expanded={open}
+                                    aria-haspopup="true"
+                                    onClick={() => setOpen(!open)}
                                 >
-                                    Login
-                                </button>
-                            </Link>
+                                    <span className="sr-only">Open user menu</span>
 
-                            <Link href="/register">
-                                <button
-                                    type="button"
-                                    className="cursor-pointer rounded-full border border-blue-500 bg-blue-600 px-4 py-2 font-medium text-sm text-white tracking-wide transition-all hover:bg-blue-700"
-                                >
-                                    Sign up
+                                    <img
+                                        className="size-8 rounded-full"
+                                        src="https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80"
+                                        alt="User avatar"
+                                    />
                                 </button>
-                            </Link>
-                        </div>
+
+                                <div
+                                    className={clsx(
+                                        'absolute right-0 mt-2 w-56 origin-top-right rounded-lg bg-gray-800 shadow-xl ring-1 ring-black/20 transition-all duration-200',
+                                        open
+                                            ? 'pointer-events-auto translate-y-0 scale-100 opacity-100'
+                                            : '-translate-y-2 pointer-events-none scale-95 opacity-0'
+                                    )}
+                                >
+                                    <div className="border-gray-700 border-b px-5 py-3">
+                                        <span
+                                            className="block select-none font-semibold text-gray-400 text-xs uppercase tracking-widest"
+                                        >
+                                            Account
+                                        </span>
+                                        <h1
+                                            className="mt-1 max-w-full truncate font-mono font-semibold text-sm text-white"
+                                            title={userEmail}
+                                        >
+                                            {userEmail}
+                                        </h1>
+                                    </div>
+                                    <ul className="py-0 font-medium text-gray-300 text-sm">
+                                        {[
+                                            { icon: UserIcon, label: 'My profile', href: '/' },
+                                            { icon: PencilSquareIcon, label: 'Edit profile', href: '/' },
+                                            { icon: EnvelopeIcon, label: 'Inbox', href: '/' },
+                                            { icon: Cog8ToothIcon, label: 'Settings', href: '/' },
+                                            { icon: QuestionMarkCircleIcon, label: 'Help', href: '/' },
+                                        ].map(({ icon: Icon, label, href }, i) => (
+                                            <li
+                                                key={label}
+                                                className={clsx(
+                                                    "flex cursor-pointer items-center gap-3 rounded-md px-5 py-3 transition-colors duration-150",
+                                                    "transition-colors duration-500 hover:bg-gray-700 hover:text-white",
+                                                    i > 0 ? "border-gray-700 border-t transition-colors duration-500" : ''
+                                                )}
+                                            >
+                                                <Icon className="h-5 w-5 flex-shrink-0 text-gray-400 transition-colors duration-150 group-hover:text-white" />
+                                                <a href={href} className="flex-1 truncate">
+                                                    {label}
+                                                </a>
+                                            </li>
+                                        ))}
+                                        <li className="border-gray-700 border-t last:mb-0">
+                                            <button
+                                                type="button"
+                                                onClick={() => signOut({ callbackUrl: '/login' })}
+                                                className="flex w-full items-center gap-3 rounded-md px-5 py-3 font-semibold text-red-500 transition-colors duration-150 hover:bg-red-700 hover:text-red-100 focus:outline-none focus:ring-2 focus:ring-red-400"
+                                            >
+                                                <ArrowRightIcon className="h-5 w-5 flex-shrink-0" />
+                                                Logout
+                                            </button>
+                                        </li>
+                                    </ul>
+                                </div>
+                            </div>
+                        )}
                         <button
                             type="button"
                             id="toggleOpen"

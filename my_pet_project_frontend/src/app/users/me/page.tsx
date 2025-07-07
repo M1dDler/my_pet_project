@@ -3,6 +3,10 @@ import { useEffect, useState } from "react";
 import { useSession } from "next-auth/react";
 import ky from "ky";
 import { useRouter } from "next/navigation";
+import Sidebar from "@/components/Sidebar";
+import { Toast } from "@/components/Toast";
+import Navbar from "@/components/Navbar";
+import LoadingSpinner from "@/components/LoadingSpinner";
 
 interface User {
   id: number;
@@ -16,7 +20,8 @@ export default function UserPage() {
 
   const [jsonData, setJsonData] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const [errorMessage, setErrorMessage] = useState("");
+  const [showToast, setShowToast] = useState(false);
 
   useEffect(() => {
     if (status === "loading") {
@@ -41,17 +46,40 @@ export default function UserPage() {
         const data = (await response.json()) as User;
         setJsonData(data);
       })
-      .catch(() => setError("Не вдалося отримати дані"))
+      .catch(() => setErrorMessage("Error"))
       .finally(() => setLoading(false));
   }, [session?.accessToken, status, router]);
 
-  if (loading || status === "loading") return <div>Завантаження...</div>;
-  if (error) return <div>{error}</div>;
+  if (loading || status === "loading") return <LoadingSpinner/>
+;
+  if (errorMessage) return <div>{errorMessage}</div>;
   if (!jsonData) return <div>Дані відсутні</div>;
 
   return (
-    <pre style={{ whiteSpace: "pre-wrap", wordBreak: "break-word" }}>
-      {JSON.stringify(jsonData, null, 2)}
-    </pre>
-  );
+  <div className="flex min-h-screen flex-col bg-[#1a1a1a]">
+    <Navbar />
+    {showToast && (
+      <Toast
+        type="error"
+        message={errorMessage}
+        onClose={() => setShowToast(false)}
+      />
+    )}
+    <div className="flex flex-1 overflow-hidden">
+      <Sidebar/>
+
+      <main
+        className="flex grow items-center justify-center bg-gray-900 px-4"
+        // style={{
+        //   backgroundImage: 'url("/login/background.jpg")',
+        //   backgroundSize: "cover",
+        //   backgroundPosition: "center",
+        //   backgroundRepeat: "no-repeat",
+        // }}
+      >
+        {/* Content */}
+      </main>
+    </div>
+  </div>
+);
 }
