@@ -7,12 +7,19 @@ import Sidebar from "@/components/Sidebar";
 import { Toast } from "@/components/Toast";
 import Navbar from "@/components/Navbar";
 import LoadingSpinner from "@/components/LoadingSpinner";
+import DountChart from "@/components/DountChart";
 
 interface User {
   id: number;
   username: string;
   email: string;
 }
+
+
+const tabs = [
+  { id: "overview", label: "Overview" },
+  { id: "transactions", label: "Transactions" },
+];
 
 export default function UserPage() {
   const { data: session, status } = useSession();
@@ -22,6 +29,7 @@ export default function UserPage() {
   const [loading, setLoading] = useState(true);
   const [errorMessage, setErrorMessage] = useState("");
   const [showToast, setShowToast] = useState(false);
+  const [activeTab, setActiveTab] = useState("home");
 
   useEffect(() => {
     if (status === "loading") {
@@ -33,6 +41,7 @@ export default function UserPage() {
       return;
     }
 
+    setActiveTab("overview");
     ky.get("http://localhost:8080/api/v1/users/me", {
       headers: {
         Authorization: `Bearer ${session.accessToken}`,
@@ -50,36 +59,101 @@ export default function UserPage() {
       .finally(() => setLoading(false));
   }, [session?.accessToken, status, router]);
 
-  if (loading || status === "loading") return <LoadingSpinner/>
-;
+  if (loading || status === "loading") return <LoadingSpinner />
+    ;
   if (errorMessage) return <div>{errorMessage}</div>;
   if (!jsonData) return <div>Дані відсутні</div>;
 
   return (
-  <div className="flex min-h-screen flex-col bg-[#1a1a1a]">
-    <Navbar />
-    {showToast && (
-      <Toast
-        type="error"
-        message={errorMessage}
-        onClose={() => setShowToast(false)}
-      />
-    )}
-    <div className="flex flex-1 overflow-hidden">
-      <Sidebar/>
+    <div className="flex min-h-screen flex-col bg-[#1a1a1a]">
+      <Navbar />
+      {showToast && (
+        <Toast
+          type="error"
+          message={errorMessage}
+          onClose={() => setShowToast(false)}
+        />
+      )}
+      <div className="flex flex-1 overflow-hidden">
+        <Sidebar />
 
-      <main
-        className="flex grow items-center justify-center bg-gray-900 px-4"
-        // style={{
-        //   backgroundImage: 'url("/login/background.jpg")',
-        //   backgroundSize: "cover",
-        //   backgroundPosition: "center",
-        //   backgroundRepeat: "no-repeat",
-        // }}
-      >
-        {/* Content */}
-      </main>
+        <main className="flex grow flex-col bg-gray-900 px-3 py-3">
+          
+          <div className="flex">
+            <div className="mb-6">
+        
+              <div className="w-fit rounded-xl p-4 text-white">
+                <div className="mb-2 flex items-center gap-2 text-gray-400">
+                  <div className="flex h-6 w-6 items-center justify-center rounded-full bg-green-500">
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      fill="white"
+                      viewBox="0 0 24 24"
+                      className="h-4 w-4"
+                    >
+                      <title id="iconTitle">User icon</title>
+                      <path d="M12 2C10 2 8.5 4 8.5 6S10 10 12 10 15.5 8 15.5 6 14 2 12 2zm0 12c-2 0-6 1-6 4v2h12v-2c0-3-4-4-6-4z" />
+                    </svg>
+                  </div>
+                  <span>MyPortfolio</span>
+                </div>
+                <div className="mb-2 font-semibold text-4xl text-white">UAH 2,728,786.88</div>
+                <div className="text-green-400">
+                  +UAH 6,250.57 <span>▲ 0.23% (24г)</span>
+                </div>
+              </div>
+
+              <div className="px-3">
+                <button className="rounded-lg bg-blue-600 px-4 py-2 font-medium text-sm text-white shadow-md transition hover:bg-blue-700" type="button">
+                  Add Transaction
+                </button>
+              </div>
+
+            </div>
+            <div className="my-3 ml-auto hidden sm:flex">
+              <DountChart />
+            </div>
+          </div>
+          <div>
+            <ul className="flex border-gray-600 border-b-2">
+              {tabs.map(({ id, label }) => {
+                const isActive = id === activeTab;
+                return (
+                  <li key={id} className="px-3 py-2">
+                    <button
+                      type="button"
+                      onClick={() => setActiveTab(id)}
+                      className={`select-text font-medium text-[15px] transition-colors ${isActive ? "text-blue-400" : "text-gray-300"
+                        } hover:text-blue-300`}
+                    >
+                      {label}
+                    </button>
+                  </li>
+                );
+              })}
+            </ul>
+
+            <div className="">
+              {activeTab === "overview" && (
+                <div>
+                  <h4 className="font-semibold text-base text-slate-900">Overview</h4>
+                  <div className="text-slate-600 text-sm leading-relaxed">
+                    Overwiew
+                  </div>
+                </div>
+              )}
+              {activeTab === "transactions" && (
+                <div>
+                  <h4 className="font-semibold text-base text-slate-900">Transactions</h4>
+                  <p className="mt-2 text-slate-600 text-sm leading-relaxed">
+                    Transactions.
+                  </p>
+                </div>
+              )}
+            </div>
+          </div>
+        </main>
+      </div>
     </div>
-  </div>
-);
+  );
 }
