@@ -2,7 +2,7 @@ import { PencilIcon, PlusIcon } from '@heroicons/react/24/outline';
 
 export default function Sidebar() {
     return (
-        <div className="hidden h-full w-80 flex-col overflow-hidden bg-[#1a1a1a] p-5 text-white md:flex">
+        <div className="hidden h-full w-80 min-w-[320px] flex-col overflow-hidden bg-[#1a1a1a] p-5 text-white md:flex">
             
             <div className="mb-6 flex items-center justify-between">
                 <h2 className="font-semibold text-lg">My portfolios</h2>

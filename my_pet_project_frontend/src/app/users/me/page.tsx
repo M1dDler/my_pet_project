@@ -8,6 +8,8 @@ import { Toast } from "@/components/Toast";
 import Navbar from "@/components/Navbar";
 import LoadingSpinner from "@/components/LoadingSpinner";
 import DountChart from "@/components/DountChart";
+import LineChart from "@/components/LineChart";
+import TransactionsTable from "@/components/AssetsTable";
 
 interface User {
   id: number;
@@ -74,14 +76,13 @@ export default function UserPage() {
           onClose={() => setShowToast(false)}
         />
       )}
-      <div className="flex flex-1 overflow-hidden">
+      <div className="flex flex-1">
         <Sidebar />
 
-        <main className="flex grow flex-col bg-gray-900 px-3 py-3">
-          
+        <main className="flex min-w-0 max-w-full grow flex-col overflow-x-auto bg-gray-900 px-3 py-3">
           <div className="flex">
             <div className="mb-6">
-        
+
               <div className="w-fit rounded-xl p-4 text-white">
                 <div className="mb-2 flex items-center gap-2 text-gray-400">
                   <div className="flex h-6 w-6 items-center justify-center rounded-full bg-green-500">
@@ -138,7 +139,12 @@ export default function UserPage() {
                 <div>
                   <h4 className="font-semibold text-base text-slate-900">Overview</h4>
                   <div className="text-slate-600 text-sm leading-relaxed">
-                    Overwiew
+                    <div className="mb-4">
+                      <LineChart />
+                    </div>
+                    <div>
+                    <TransactionsTable/>
+                    </div>
                   </div>
                 </div>
               )}
