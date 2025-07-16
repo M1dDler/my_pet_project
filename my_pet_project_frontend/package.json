@@ -12,6 +12,7 @@
     "prepare": "husky"
   },
   "dependencies": {
+    "@headlessui/react": "^2.2.4",
     "@heroicons/react": "^2.2.0",
     "@t3-oss/env-nextjs": "^0.13.8",
     "chart.js": "^4.5.0",

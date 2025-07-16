@@ -10,6 +10,7 @@ import LoadingSpinner from "@/components/LoadingSpinner";
 import DountChart from "@/components/DountChart";
 import LineChart from "@/components/LineChart";
 import TransactionsTable from "@/components/AssetsTable";
+import CreatePortfolioForm from "@/components/CreatePortfolioForm";
 
 interface User {
   id: number;
@@ -26,12 +27,13 @@ const tabs = [
 export default function UserPage() {
   const { data: session, status } = useSession();
   const router = useRouter();
-
+  const [isCreatePortfolioFormOpen, setCreatePortfolioFormOpen] = useState(false);
   const [jsonData, setJsonData] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
-  const [errorMessage, setErrorMessage] = useState("");
+  const [toastMessage, setToastMessage] = useState("");
   const [showToast, setShowToast] = useState(false);
   const [activeTab, setActiveTab] = useState("home");
+  const [selectedPortfolioId, setSelectedPortfolioId] = useState<number | null>(null);
 
   useEffect(() => {
     if (status === "loading") {
@@ -57,13 +59,11 @@ export default function UserPage() {
         const data = (await response.json()) as User;
         setJsonData(data);
       })
-      .catch(() => setErrorMessage("Error"))
+      .catch(() => setToastMessage("Error"))
       .finally(() => setLoading(false));
   }, [session?.accessToken, status, router]);
 
-  if (loading || status === "loading") return <LoadingSpinner />
-    ;
-  if (errorMessage) return <div>{errorMessage}</div>;
+  if (loading || status === "loading") return <LoadingSpinner />;
   if (!jsonData) return <div>Дані відсутні</div>;
 
   return (
@@ -71,15 +71,24 @@ export default function UserPage() {
       <Navbar />
       {showToast && (
         <Toast
-          type="error"
-          message={errorMessage}
+          type="success"
+          message={toastMessage}
           onClose={() => setShowToast(false)}
         />
       )}
       <div className="flex flex-1">
-        <Sidebar />
+        <Sidebar
+          selectedPortfolioId={selectedPortfolioId}
+          onSelectPortfolio={setSelectedPortfolioId}
+          onOpenCreatePortfolioForm={() => setCreatePortfolioFormOpen(true)}
+        />
 
         <main className="flex min-w-0 max-w-full grow flex-col overflow-x-auto bg-gray-900 px-3 py-3">
+          {selectedPortfolioId && (
+            <div className="mb-4 text-gray-400 text-sm">
+              Portfolio ID: {selectedPortfolioId}
+            </div>
+          )}
           <div className="flex">
             <div className="mb-6">
 
@@ -143,7 +152,7 @@ export default function UserPage() {
                       <LineChart />
                     </div>
                     <div>
-                    <TransactionsTable/>
+                      <TransactionsTable />
                     </div>
                   </div>
                 </div>
@@ -160,6 +169,17 @@ export default function UserPage() {
           </div>
         </main>
       </div>
+      {isCreatePortfolioFormOpen && (
+        <CreatePortfolioForm
+          onClose={() => setCreatePortfolioFormOpen(false)}
+          onSubmit={(name, includeInTotal, newPortfolioId) => {
+            setToastMessage(`Portfolio: ${name}, ${includeInTotal}`)
+            setShowToast(true)
+            setSelectedPortfolioId(newPortfolioId);
+            setCreatePortfolioFormOpen(false);
+          }}
+        />
+      )}
     </div>
   );
 }
