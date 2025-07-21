@@ -3,7 +3,7 @@ import { useEffect, useState } from "react";
 import { useSession } from "next-auth/react";
 import ky from "ky";
 import { useRouter } from "next/navigation";
-import Sidebar from "@/components/Sidebar";
+import Sidebar from "@/components/Sidebar/Sidebar";
 import { Toast } from "@/components/Toast";
 import Navbar from "@/components/Navbar";
 import LoadingSpinner from "@/components/LoadingSpinner";
@@ -11,6 +11,7 @@ import DountChart from "@/components/DountChart";
 import LineChart from "@/components/LineChart";
 import TransactionsTable from "@/components/AssetsTable";
 import CreatePortfolioForm from "@/components/CreatePortfolioForm";
+import DeletePortfolioForm from "@/components/Sidebar/DeletePortfolioItem";
 
 interface User {
   id: number;
@@ -34,6 +35,13 @@ export default function UserPage() {
   const [showToast, setShowToast] = useState(false);
   const [activeTab, setActiveTab] = useState("home");
   const [selectedPortfolioId, setSelectedPortfolioId] = useState<number | null>(null);
+  const [isDeletePortfolioFormOpen, setDeletePortfolioFormOpen] = useState(false);
+  const [portfolioIdToDelete, setPortfolioIdToDelete] = useState<number | null>(null);
+
+  const handleRequestDeletePortfolio = (id: number) => {
+    setPortfolioIdToDelete(id);
+    setDeletePortfolioFormOpen(true);
+  };
 
   useEffect(() => {
     if (status === "loading") {
@@ -80,6 +88,7 @@ export default function UserPage() {
         <Sidebar
           selectedPortfolioId={selectedPortfolioId}
           onSelectPortfolio={setSelectedPortfolioId}
+          onRequestDeletePortfolio={handleRequestDeletePortfolio}
           onOpenCreatePortfolioForm={() => setCreatePortfolioFormOpen(true)}
         />
 
@@ -177,6 +186,18 @@ export default function UserPage() {
             setShowToast(true)
             setSelectedPortfolioId(newPortfolioId);
             setCreatePortfolioFormOpen(false);
+          }}
+        />
+      )}
+      {isDeletePortfolioFormOpen && portfolioIdToDelete && session?.accessToken && (
+        <DeletePortfolioForm
+          portfolioId={portfolioIdToDelete}
+          accessToken={session.accessToken}
+          onClose={() => setDeletePortfolioFormOpen(false)}
+          onDeleted={() => {
+            setToastMessage("Portfolio deleted successfully");
+            setShowToast(true);
+            setPortfolioIdToDelete(null);
           }}
         />
       )}
