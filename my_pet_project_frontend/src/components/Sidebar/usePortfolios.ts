@@ -13,7 +13,7 @@ const LS_KEY = "portfolioOrder";
 
 export function usePortfolios(
   selectedPortfolioId: number | null,
-  onSelectPortfolio: (id: number) => void
+  onSelectPortfolio: (id: number | null) => void
 ) {
   const [portfolios, setPortfolios] = useState<Portfolio[]>([]);
   const [loading, setLoading] = useState(true);
@@ -54,7 +54,7 @@ export function usePortfolios(
         setPortfolios(orderedPortfolios);
 
         if (orderedPortfolios.length > 0 && !selectedPortfolioId) {
-          onSelectPortfolio(orderedPortfolios[0].id);
+          onSelectPortfolio(null);
         }
       } catch (_) {
         setErrorMessage("Помилка завантаження портфоліо");

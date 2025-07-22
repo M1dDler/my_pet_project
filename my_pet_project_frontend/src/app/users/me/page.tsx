@@ -33,7 +33,7 @@ export default function UserPage() {
   const [loading, setLoading] = useState(true);
   const [toastMessage, setToastMessage] = useState("");
   const [showToast, setShowToast] = useState(false);
-  const [activeTab, setActiveTab] = useState("home");
+  const [activeTab, setActiveTab] = useState("overview");
   const [selectedPortfolioId, setSelectedPortfolioId] = useState<number | null>(null);
   const [isDeletePortfolioFormOpen, setDeletePortfolioFormOpen] = useState(false);
   const [portfolioIdToDelete, setPortfolioIdToDelete] = useState<number | null>(null);
@@ -53,7 +53,6 @@ export default function UserPage() {
       return;
     }
 
-    setActiveTab("overview");
     ky.get("http://localhost:8080/api/v1/users/me", {
       headers: {
         Authorization: `Bearer ${session.accessToken}`,
@@ -198,6 +197,9 @@ export default function UserPage() {
             setToastMessage("Portfolio deleted successfully");
             setShowToast(true);
             setPortfolioIdToDelete(null);
+            if (portfolioIdToDelete === selectedPortfolioId) {
+              setSelectedPortfolioId(null);
+            }
           }}
         />
       )}

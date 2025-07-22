@@ -17,7 +17,7 @@ interface SortablePortfolioItemProps {
   portfolio: Portfolio;
   isActive: boolean;
   isEditMode: boolean;
-  onSelectPortfolio: (id: number) => void;
+  onSelectPortfolio: (id: number | null) => void;
   onRequestDeletePortfolio: (id: number) => void;
 }
 
