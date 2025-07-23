@@ -1,8 +1,6 @@
 "use client";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useSession } from "next-auth/react";
-import ky from "ky";
-import { useRouter } from "next/navigation";
 import Sidebar from "@/components/Sidebar/Sidebar";
 import { Toast } from "@/components/Toast";
 import Navbar from "@/components/Navbar";
@@ -12,13 +10,9 @@ import LineChart from "@/components/LineChart";
 import TransactionsTable from "@/components/AssetsTable";
 import CreatePortfolioForm from "@/components/CreatePortfolioForm";
 import DeletePortfolioForm from "@/components/Sidebar/DeletePortfolioItem";
-
-interface User {
-  id: number;
-  username: string;
-  email: string;
-}
-
+import { usePortfolios } from "@/components/Sidebar/usePortfolios";
+import type { Portfolio } from "@/components/Sidebar/types";
+import type { ToastType } from "types/toastTypes";
 
 const tabs = [
   { id: "overview", label: "Overview" },
@@ -26,13 +20,14 @@ const tabs = [
 ];
 
 export default function UserPage() {
-  const { data: session, status } = useSession();
-  const router = useRouter();
-  const [isCreatePortfolioFormOpen, setCreatePortfolioFormOpen] = useState(false);
-  const [jsonData, setJsonData] = useState<User | null>(null);
-  const [loading, setLoading] = useState(true);
+
+
   const [toastMessage, setToastMessage] = useState("");
+  const [toastType, setToastType] = useState<ToastType>("info");
+  const [toastDescription, setToastDescription] = useState("")
   const [showToast, setShowToast] = useState(false);
+  const { data: session, status } = useSession();
+  const [isCreatePortfolioFormOpen, setCreatePortfolioFormOpen] = useState(false);
   const [activeTab, setActiveTab] = useState("overview");
   const [selectedPortfolioId, setSelectedPortfolioId] = useState<number | null>(null);
   const [isDeletePortfolioFormOpen, setDeletePortfolioFormOpen] = useState(false);
@@ -43,43 +38,22 @@ export default function UserPage() {
     setDeletePortfolioFormOpen(true);
   };
 
-  useEffect(() => {
-    if (status === "loading") {
-      return;
-    }
-
-    if (!session?.accessToken) {
-      router.push("/login");
-      return;
-    }
-
-    ky.get("http://localhost:8080/api/v1/users/me", {
-      headers: {
-        Authorization: `Bearer ${session.accessToken}`,
-      },
-      throwHttpErrors: false,
-    })
-      .then(async (response) => {
-        if (!response.ok) {
-          throw new Error("Помилка завантаження");
-        }
-        const data = (await response.json()) as User;
-        setJsonData(data);
-      })
-      .catch(() => setToastMessage("Error"))
-      .finally(() => setLoading(false));
-  }, [session?.accessToken, status, router]);
+  const {
+    portfolios,
+    setPortfolios,
+    loading,
+  } = usePortfolios();
 
   if (loading || status === "loading") return <LoadingSpinner />;
-  if (!jsonData) return <div>Дані відсутні</div>;
 
   return (
     <div className="flex min-h-screen flex-col bg-[#1a1a1a]">
       <Navbar />
       {showToast && (
         <Toast
-          type="success"
+          type={toastType}
           message={toastMessage}
+          description={toastDescription}
           onClose={() => setShowToast(false)}
         />
       )}
@@ -89,6 +63,9 @@ export default function UserPage() {
           onSelectPortfolio={setSelectedPortfolioId}
           onRequestDeletePortfolio={handleRequestDeletePortfolio}
           onOpenCreatePortfolioForm={() => setCreatePortfolioFormOpen(true)}
+          portfolios={portfolios ?? []}
+          setPortfolios={setPortfolios}
+          loading={loading}
         />
 
         <main className="flex min-w-0 max-w-full grow flex-col overflow-x-auto bg-gray-900 px-3 py-3">
@@ -180,10 +157,13 @@ export default function UserPage() {
       {isCreatePortfolioFormOpen && (
         <CreatePortfolioForm
           onClose={() => setCreatePortfolioFormOpen(false)}
-          onSubmit={(name, includeInTotal, newPortfolioId) => {
-            setToastMessage(`Portfolio: ${name}, ${includeInTotal}`)
-            setShowToast(true)
-            setSelectedPortfolioId(newPortfolioId);
+          onSubmit={(newCreatedPortfolio: Portfolio, includeInTotal: boolean) => {
+            setToastMessage(`Created - (${includeInTotal})`);
+            setToastDescription("Portfolio created successfully")
+            setToastType("success")
+            setShowToast(true);
+            setSelectedPortfolioId(newCreatedPortfolio.id);
+            setPortfolios((prev) => [...prev, newCreatedPortfolio]);
             setCreatePortfolioFormOpen(false);
           }}
         />
@@ -191,15 +171,17 @@ export default function UserPage() {
       {isDeletePortfolioFormOpen && portfolioIdToDelete && session?.accessToken && (
         <DeletePortfolioForm
           portfolioId={portfolioIdToDelete}
-          accessToken={session.accessToken}
           onClose={() => setDeletePortfolioFormOpen(false)}
           onDeleted={() => {
-            setToastMessage("Portfolio deleted successfully");
+            setToastMessage("Deleted");
+            setToastDescription("Portfolio deleted successfully")
+            setToastType("success")
             setShowToast(true);
             setPortfolioIdToDelete(null);
             if (portfolioIdToDelete === selectedPortfolioId) {
               setSelectedPortfolioId(null);
             }
+            setPortfolios((prev) => prev.filter((p) => p.id !== portfolioIdToDelete));
           }}
         />
       )}

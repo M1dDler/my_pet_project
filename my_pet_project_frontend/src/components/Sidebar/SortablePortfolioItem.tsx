@@ -14,19 +14,19 @@ interface Portfolio {
 }
 
 interface SortablePortfolioItemProps {
-  portfolio: Portfolio;
-  isActive: boolean;
-  isEditMode: boolean;
-  onSelectPortfolio: (id: number | null) => void;
-  onRequestDeletePortfolio: (id: number) => void;
+    portfolio: Portfolio;
+    isActive: boolean;
+    isEditMode: boolean;
+    onSelectPortfolio: (id: number | null) => void;
+    onRequestDeletePortfolio: (id: number) => void;
 }
 
 export default function SortablePortfolioItem({
-  portfolio,
-  isActive,
-  onSelectPortfolio,
-  isEditMode,
-  onRequestDeletePortfolio,
+    portfolio,
+    isActive,
+    onSelectPortfolio,
+    isEditMode,
+    onRequestDeletePortfolio,
 }: SortablePortfolioItemProps) {
     const { attributes, listeners, setNodeRef, transform, transition } = useSortable({
         id: portfolio.id,
@@ -54,14 +54,14 @@ export default function SortablePortfolioItem({
         };
     }, [menuOpen]);
 
-    function handleEdit(e: React.MouseEvent) {
-        e.stopPropagation();
+    function handleEdit() {
         alert(`Edit portfolio ${portfolio.name}`);
         setMenuOpen(false);
     }
 
     function handleDelete() {
         onRequestDeletePortfolio(portfolio.id);
+        setMenuOpen(false);
     }
 
     return (
@@ -100,7 +100,7 @@ export default function SortablePortfolioItem({
 
             <button
                 type="button"
-                onClick={() => onSelectPortfolio(portfolio.id)}
+                onClick={isEditMode ? undefined : () => onSelectPortfolio(portfolio.id)}
                 aria-label={`Select portfolio ${portfolio.name}`}
                 className="flex flex-1 items-center gap-4 text-left"
             >
@@ -129,78 +129,80 @@ export default function SortablePortfolioItem({
                 </div>
             </button>
 
-            {isEditMode && (
-                <div ref={menuRef} className="relative">
-                    <button
-                        type="button"
-                        aria-label={`Open menu for portfolio ${portfolio.name}`}
-                        onClick={(e) => {
-                            e.stopPropagation();
-                            setMenuOpen((open) => !open);
-                        }}
-                        className="p-1 text-gray-400 hover:text-gray-200"
-                    >
-                        <svg
-                            xmlns="http://www.w3.org/2000/svg"
-                            fill="none"
-                            stroke="currentColor"
-                            strokeWidth="2"
-                            viewBox="0 0 24 24"
-                            className="h-4 w-4"
-                            role="img"
-                            aria-labelledby={`menuIconTitle-${portfolio.id}`}
+            {
+                isEditMode && (
+                    <div ref={menuRef} className="relative">
+                        <button
+                            type="button"
+                            aria-label={`Open menu for portfolio ${portfolio.name}`}
+                            onClick={(e) => {
+                                e.stopPropagation();
+                                setMenuOpen((open) => !open);
+                            }}
+                            className="p-1 text-gray-400 hover:text-gray-200"
                         >
-                            <title id={`menuIconTitle-${portfolio.id}`}>Menu</title>
-                            <circle cx="12" cy="5" r="1.5" />
-                            <circle cx="12" cy="12" r="1.5" />
-                            <circle cx="12" cy="19" r="1.5" />
-                        </svg>
-                    </button>
-
-                    {menuOpen && (
-                        <div className="absolute top-full right-0 z-50 mt-4 w-40 rounded-lg bg-gray-800 p-2 shadow-xl ring-1 ring-black ring-opacity-30">
-                            <button
-                                type="button"
-                                onClick={handleEdit}
-                                className="flex w-full items-center gap-2 rounded-md px-3 py-2 text-left text-white transition-colors hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                            <svg
+                                xmlns="http://www.w3.org/2000/svg"
+                                fill="none"
+                                stroke="currentColor"
+                                strokeWidth="2"
+                                viewBox="0 0 24 24"
+                                className="h-4 w-4"
+                                role="img"
+                                aria-labelledby={`menuIconTitle-${portfolio.id}`}
                             >
-                                <svg
-                                    xmlns="http://www.w3.org/2000/svg"
-                                    className="h-5 w-5 flex-shrink-0"
-                                    fill="none"
-                                    viewBox="0 0 24 24"
-                                    stroke="currentColor"
-                                    strokeWidth={2}
-                                    aria-hidden="true"
-                                >
-                                    <path strokeLinecap="round" strokeLinejoin="round" d="M11 5h6m-3 3v12M4 19h12" />
-                                    <path strokeLinecap="round" strokeLinejoin="round" d="M16 3a2 2 0 012 2v4" />
-                                </svg>
-                                Rename
-                            </button>
-                            <button
-                                type="button"
-                                onClick={handleDelete}
-                                className="flex w-full items-center gap-2 rounded-md px-3 py-2 text-left text-red-700 transition-colors hover:bg-red-300 focus:outline-none focus:ring-2 focus:ring-red-500"
-                            >
-                                <svg
-                                    xmlns="http://www.w3.org/2000/svg"
-                                    className="h-5 w-5 flex-shrink-0"
-                                    fill="none"
-                                    viewBox="0 0 24 24"
-                                    stroke="currentColor"
-                                    strokeWidth={2}
-                                    aria-hidden="true"
-                                >
-                                    <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
-                                </svg>
-                                Delete
-                            </button>
-                        </div>
+                                <title id={`menuIconTitle-${portfolio.id}`}>Menu</title>
+                                <circle cx="12" cy="5" r="1.5" />
+                                <circle cx="12" cy="12" r="1.5" />
+                                <circle cx="12" cy="19" r="1.5" />
+                            </svg>
+                        </button>
 
-                    )}
-                </div>
-            )}
-        </div>
+                        {menuOpen && (
+                            <div className="absolute top-full right-0 z-50 mt-4 w-40 rounded-lg bg-gray-800 p-2 shadow-xl ring-1 ring-black ring-opacity-30">
+                                <button
+                                    type="button"
+                                    onClick={handleEdit}
+                                    className="flex w-full items-center gap-2 rounded-md px-3 py-2 text-left text-white transition-colors hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                                >
+                                    <svg
+                                        xmlns="http://www.w3.org/2000/svg"
+                                        className="h-5 w-5 flex-shrink-0"
+                                        fill="none"
+                                        viewBox="0 0 24 24"
+                                        stroke="currentColor"
+                                        strokeWidth={2}
+                                        aria-hidden="true"
+                                    >
+                                        <path strokeLinecap="round" strokeLinejoin="round" d="M11 5h6m-3 3v12M4 19h12" />
+                                        <path strokeLinecap="round" strokeLinejoin="round" d="M16 3a2 2 0 012 2v4" />
+                                    </svg>
+                                    Rename
+                                </button>
+                                <button
+                                    type="button"
+                                    onClick={handleDelete}
+                                    className="flex w-full items-center gap-2 rounded-md px-3 py-2 text-left text-red-700 transition-colors hover:bg-red-300 focus:outline-none focus:ring-2 focus:ring-red-500"
+                                >
+                                    <svg
+                                        xmlns="http://www.w3.org/2000/svg"
+                                        className="h-5 w-5 flex-shrink-0"
+                                        fill="none"
+                                        viewBox="0 0 24 24"
+                                        stroke="currentColor"
+                                        strokeWidth={2}
+                                        aria-hidden="true"
+                                    >
+                                        <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+                                    </svg>
+                                    Delete
+                                </button>
+                            </div>
+
+                        )}
+                    </div>
+                )
+            }
+        </div >
     );
 }

@@ -2,12 +2,7 @@ import { useEffect, useState } from "react";
 import ky from "ky";
 import { useRouter } from "next/navigation";
 import { getSession } from "next-auth/react";
-
-interface Portfolio {
-  id: number;
-  name: string;
-  totalValue: number;
-}
+import type { Portfolio } from "./types";
 
 const LS_KEY = "portfolioOrder";
 

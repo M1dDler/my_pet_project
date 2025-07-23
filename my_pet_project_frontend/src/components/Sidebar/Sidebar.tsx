@@ -8,13 +8,16 @@ import { SortableContext, verticalListSortingStrategy } from "@dnd-kit/sortable"
 import LoadingSpinner from "../LoadingSpinner";
 import SortablePortfolioItem from "./SortablePortfolioItem";
 import handleDragEnd from "./usePortfolioDrag";
-import { usePortfolios } from "./usePortfolios";
+import type { Portfolio } from "./types";
 
 interface SidebarProps {
   onSelectPortfolio: (id: number | null) => void;
   selectedPortfolioId: number | null;
   onOpenCreatePortfolioForm: () => void;
   onRequestDeletePortfolio: (id: number) => void;
+  portfolios: Portfolio[];
+  setPortfolios: React.Dispatch<React.SetStateAction<Portfolio[]>>;
+  loading: boolean;
 }
 
 export default function Sidebar({
@@ -22,16 +25,13 @@ export default function Sidebar({
   selectedPortfolioId,
   onOpenCreatePortfolioForm,
   onRequestDeletePortfolio,
+  portfolios,
+  setPortfolios,
+  loading,
 }: SidebarProps) {
   const [isEditMode, setIsEditMode] = useState(false);
   const prevEditMode = useRef(false);
   const sensors = useSensors(useSensor(PointerSensor));
-
-  const {
-    portfolios,
-    setPortfolios,
-    loading,
-  } = usePortfolios(selectedPortfolioId, onSelectPortfolio);
 
   useEffect(() => {
     const LS_KEY = "portfolioOrder";
@@ -41,16 +41,17 @@ export default function Sidebar({
     prevEditMode.current = isEditMode;
   }, [isEditMode, portfolios]);
 
-  if (loading)
+  if (loading || !Array.isArray(portfolios)) {
     return (
       <div className="flex h-full w-80 min-w-[320px] items-center justify-center bg-[#1a1a1a] text-white">
         <LoadingSpinner />
       </div>
     );
+  }
 
   return (
     <div className="hidden h-full w-80 min-w-[320px] flex-col overflow-hidden bg-[#1a1a1a] p-5 text-white md:flex">
-      <div className={`relative mb-4 flex items-center gap-4 rounded-lg p-2 text-left ${selectedPortfolioId===null
+      <div className={`relative mb-4 flex items-center gap-4 rounded-lg p-2 text-left ${selectedPortfolioId === null
         ? "bg-gray-700 bg-opacity-40 hover:bg-gray-800"
         : "bg-[#1a1a1a] hover:bg-gray-800"
         } hover:bg-opacity-60`}

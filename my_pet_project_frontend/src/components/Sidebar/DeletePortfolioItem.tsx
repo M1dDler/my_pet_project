@@ -2,19 +2,18 @@
 
 import { useState } from "react";
 import ky from "ky";
+import { getSession } from "next-auth/react";
 
 interface DeletePortfolioFormProps {
     portfolioId: number;
     onClose: () => void;
     onDeleted: () => void;
-    accessToken: string;
 }
 
 export default function DeletePortfolioForm({
     portfolioId,
     onClose,
     onDeleted,
-    accessToken,
 }: DeletePortfolioFormProps) {
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState("");
@@ -22,10 +21,18 @@ export default function DeletePortfolioForm({
     const handleDelete = async () => {
         setLoading(true);
         setError("");
+        
         try {
+            const session = await getSession();
+            if (!session?.accessToken) {
+                setError("Not authenticated");
+                setLoading(false);
+                return;
+            }
+
             const response = await ky.delete(`http://localhost:8080/api/v1/users/me/portfolios/${portfolioId}`, {
                 headers: {
-                    Authorization: `Bearer ${accessToken}`,
+                    Authorization: `Bearer ${session.accessToken}`,
                 },
             });
 

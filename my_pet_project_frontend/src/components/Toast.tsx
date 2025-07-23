@@ -99,7 +99,7 @@ export function Toast({ type = "error", message, description, onClose }: ToastPr
   return (
     <div
       role="alert"
-      className={`fixed top-5 right-5 z-50 flex max-w-sm transform overflow-hidden rounded-md bg-[#1a1a1a] px-0 py-0 text-white shadow-[0_3px_10px_-3px_rgba(0,0,0,0.3)] transition-transform duration-500 ease-in-out ${visible ? "animate-slideInRight" : "animate-slideUpFadeOut"
+      className={`fixed top-21 right-2 z-50 flex max-w-sm transform overflow-hidden rounded-md bg-[#1a1a1a] px-0 py-0 text-white shadow-[0_3px_10px_-3px_rgba(0,0,0,0.3)] transition-transform duration-500 ease-in-out ${visible ? "animate-slideInRight" : "animate-slideUpFadeOut"
         }`}
       style={{ minWidth: "280px" }}
     >
