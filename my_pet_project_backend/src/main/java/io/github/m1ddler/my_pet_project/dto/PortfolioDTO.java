@@ -1,11 +1,9 @@
 package io.github.m1ddler.my_pet_project.dto;
 
-import io.github.m1ddler.my_pet_project.entity.Transaction;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
 
 import java.math.BigDecimal;
-import java.util.List;
 
 public class PortfolioDTO {
     private long id;
@@ -13,12 +11,13 @@ public class PortfolioDTO {
     @Size(max = 30, message = "The name is too long. Maximum allowed is 30 characters")
     private String name;
     private BigDecimal totalValue;
-    private List<Transaction> transactions;
+    private int position;
 
-    public PortfolioDTO(long id, String name, BigDecimal totalValue) {
+    public PortfolioDTO(long id, String name, BigDecimal totalValue, int position) {
         this.id = id;
         this.name = name;
         this.totalValue = totalValue;
+        this.position = position;
     }
 
     public long getId() {
@@ -45,4 +44,11 @@ public class PortfolioDTO {
         this.totalValue = totalValue;
     }
 
+    public int getPosition() {
+        return position;
+    }
+
+    public void setPosition(int position) {
+        this.position = position;
+    }
 }

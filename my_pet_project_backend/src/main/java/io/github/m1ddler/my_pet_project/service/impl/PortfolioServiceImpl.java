@@ -2,7 +2,9 @@ package io.github.m1ddler.my_pet_project.service.impl;
 
 import io.github.m1ddler.my_pet_project.dao.PortfolioRepository;
 import io.github.m1ddler.my_pet_project.dto.PortfolioDTO;
+import io.github.m1ddler.my_pet_project.dto.PortfolioPositionDTO;
 import io.github.m1ddler.my_pet_project.entity.Portfolio;
+import io.github.m1ddler.my_pet_project.entity.User;
 import io.github.m1ddler.my_pet_project.service.interfaces.PortfolioService;
 import io.github.m1ddler.my_pet_project.service.interfaces.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -11,6 +13,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 @Service
 public class PortfolioServiceImpl implements PortfolioService {
@@ -49,7 +53,10 @@ public class PortfolioServiceImpl implements PortfolioService {
 
     @Override
     public ResponseEntity<PortfolioDTO> saveCurrentUserPortfolio(PortfolioDTO portfolioDTO) {
-        Portfolio portfolio = new Portfolio(portfolioDTO.getName(), userService.getAuthenticatedUser());
+        User user = userService.getAuthenticatedUser();
+        Portfolio portfolio = new Portfolio(portfolioDTO.getName(), user);
+        Integer maxPosition = portfolioRepository.findMaxPositionByUserId(user.getId()).orElse(-1);
+        portfolio.setPosition(maxPosition + 1);
         return ResponseEntity.status(HttpStatus.CREATED)
                 .body(portfolioToPortfolioDTO(portfolioRepository.save(portfolio)));
     }
@@ -73,6 +80,35 @@ public class PortfolioServiceImpl implements PortfolioService {
     }
 
     @Override
+    public ResponseEntity<Void> updateCurrentUserPortfoliosPosition(
+            List<PortfolioPositionDTO> portfolioPositions){
+
+        List<Long> portfolioIds = portfolioPositions.stream()
+                .map(PortfolioPositionDTO::getId)
+                .toList();
+
+        List<Portfolio> portfolios = portfolioRepository.findPortfoliosByUserIdAndIds(
+                userService.getAuthenticatedUser().getId(), portfolioIds
+        ).orElse(null);
+
+        if (portfolios == null) {return ResponseEntity.status(HttpStatus.NOT_FOUND).build();}
+
+        Map<Long, Integer> idToPositionMap = portfolioPositions.stream()
+                .collect(Collectors.toMap(PortfolioPositionDTO::getId, PortfolioPositionDTO::getPosition));
+
+        for (Portfolio portfolio : portfolios) {
+            Integer newPosition = idToPositionMap.get(portfolio.getId());
+            if (newPosition != null) {
+                portfolio.setPosition(newPosition);
+            }
+        }
+
+        portfolioRepository.saveAll(portfolios);
+
+        return ResponseEntity.status(HttpStatus.OK).build();
+    }
+
+    @Override
     public ResponseEntity<Void> deleteCurrentUserPortfolioById(Long id){
         Portfolio portfolio = portfolioRepository.findByUserIdAndId(userService.getAuthenticatedUser().getId(), id)
                 .orElse(null);
@@ -89,7 +125,8 @@ public class PortfolioServiceImpl implements PortfolioService {
         return new PortfolioDTO(
                 portfolio.getId(),
                 portfolio.getName(),
-                portfolio.getTotalValue()
+                portfolio.getTotalValue(),
+                portfolio.getPosition()
         );
     }
 }

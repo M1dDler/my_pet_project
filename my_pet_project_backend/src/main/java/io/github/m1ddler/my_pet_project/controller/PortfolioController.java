@@ -1,6 +1,7 @@
 package io.github.m1ddler.my_pet_project.controller;
 
 import io.github.m1ddler.my_pet_project.dto.PortfolioDTO;
+import io.github.m1ddler.my_pet_project.dto.PortfolioPositionDTO;
 import io.github.m1ddler.my_pet_project.service.interfaces.PortfolioService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -39,6 +40,11 @@ public class PortfolioController {
     public ResponseEntity<PortfolioDTO> updatePortfolio(@PathVariable Long id,
                                                         @RequestBody @Valid PortfolioDTO portfolioDTO) {
         return portfolioService.updateCurrentUserPortfolioById(id, portfolioDTO);
+    }
+
+    @PatchMapping("/portfolios/order")
+    public ResponseEntity<Void> updatePortfolioOrder(@RequestBody List<PortfolioPositionDTO> portfolioPositions) {
+        return portfolioService.updateCurrentUserPortfoliosPosition(portfolioPositions);
     }
 
     @DeleteMapping("/portfolios/{id}")

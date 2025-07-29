@@ -18,6 +18,8 @@ public class Portfolio {
     private String name;
     @Column(name = "total_value", nullable = false)
     private BigDecimal totalValue = BigDecimal.ZERO;
+    @Column(name = "position")
+    private int position;
     @ManyToOne
     @JoinColumn(name = "user_id")
     private User user;
@@ -69,6 +71,14 @@ public class Portfolio {
 
     public void setId(long id) {
         this.id = id;
+    }
+
+    public int getPosition() {
+        return position;
+    }
+
+    public void setPosition(int position) {
+        this.position = position;
     }
 
     @Override
