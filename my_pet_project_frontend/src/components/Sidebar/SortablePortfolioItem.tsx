@@ -124,7 +124,9 @@ export default function SortablePortfolioItem({
                         <div className="max-w-[200px] truncate font-semibold text-white">{portfolio.name}</div>
                     )}
                     <div className="text-gray-300 text-xs">
-                        USD {portfolio.totalValue.toLocaleString(undefined, { minimumFractionDigits: 2 })}
+                        USD {(portfolio?.totalValue ?? 0).toLocaleString(undefined, {
+                            minimumFractionDigits: 2,
+                        })}
                     </div>
                 </div>
             </button>

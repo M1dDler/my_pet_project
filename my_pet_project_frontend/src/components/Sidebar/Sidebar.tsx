@@ -18,6 +18,7 @@ interface SidebarProps {
   portfolios: Portfolio[];
   setPortfolios: React.Dispatch<React.SetStateAction<Portfolio[]>>;
   loading: boolean;
+  saveOrder: () => Promise<void>
 }
 
 export default function Sidebar({
@@ -28,18 +29,18 @@ export default function Sidebar({
   portfolios,
   setPortfolios,
   loading,
+  saveOrder,
 }: SidebarProps) {
   const [isEditMode, setIsEditMode] = useState(false);
   const prevEditMode = useRef(false);
   const sensors = useSensors(useSensor(PointerSensor));
 
   useEffect(() => {
-    const LS_KEY = "portfolioOrder";
-    if (prevEditMode.current && !isEditMode) {
-      localStorage.setItem(LS_KEY, JSON.stringify(portfolios.map((p) => p.id)));
-    }
-    prevEditMode.current = isEditMode;
-  }, [isEditMode, portfolios]);
+  if (prevEditMode.current && !isEditMode) {
+    saveOrder();
+  }
+  prevEditMode.current = isEditMode;
+}, [isEditMode, saveOrder]);
 
   if (loading || !Array.isArray(portfolios)) {
     return (
@@ -76,9 +77,11 @@ export default function Sidebar({
           <div className="max-w-[200px] truncate font-semibold text-white">
             Review
             <div className="text-gray-300 text-xs">
-              USD {portfolios.reduce((acc, p) => acc + p.totalValue, 0).toLocaleString(undefined, {
-                minimumFractionDigits: 2,
-              })}
+              USD {Array.isArray(portfolios)
+                ? portfolios.reduce((acc, p) => acc + (p.totalValue ?? 0), 0).toLocaleString(undefined, {
+                  minimumFractionDigits: 2,
+                })
+                : "0.00"}
             </div>
           </div>
         </button>

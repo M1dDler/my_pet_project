@@ -1,11 +1,6 @@
 import type { DragEndEvent } from "@dnd-kit/core";
 import { arrayMove } from "@dnd-kit/sortable";
-
-interface Portfolio {
-  id: number;
-  name: string;
-  totalValue: number;
-}
+import type { Portfolio } from "./types";
 
 export default function handleDragEnd(
   event: DragEndEvent,

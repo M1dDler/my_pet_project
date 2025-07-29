@@ -42,6 +42,7 @@ export default function UserPage() {
     portfolios,
     setPortfolios,
     loading,
+    saveOrder,
   } = usePortfolios();
 
   if (loading || status === "loading") return <LoadingSpinner />;
@@ -66,6 +67,7 @@ export default function UserPage() {
           portfolios={portfolios ?? []}
           setPortfolios={setPortfolios}
           loading={loading}
+          saveOrder={saveOrder}
         />
 
         <main className="flex min-w-0 max-w-full grow flex-col overflow-x-auto bg-gray-900 px-3 py-3">
