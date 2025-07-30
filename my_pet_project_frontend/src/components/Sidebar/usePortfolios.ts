@@ -18,7 +18,7 @@ export function usePortfolios() {
         router.push("/login");
         return;
       }
-
+      
       try {
         const response = await ky.get("http://localhost:8080/api/v1/users/me/portfolios", {
           headers: { Authorization: `Bearer ${session.accessToken}` },
@@ -30,7 +30,6 @@ export function usePortfolios() {
         const data = (await response.json()) as Portfolio[];
 
         const sortedPortfolios = [...data].sort((a, b) => a.position - b.position);
-
         setPortfolios(sortedPortfolios);
         setOrder(sortedPortfolios.map((p, index) => ({ id: p.id, position: index })));
       } catch (_) {
@@ -56,7 +55,6 @@ export function usePortfolios() {
       });
 
       if (changedPositions.length > 0) {
-
         const response = await ky.patch(
           "http://localhost:8080/api/v1/users/me/portfolios/order",
           {

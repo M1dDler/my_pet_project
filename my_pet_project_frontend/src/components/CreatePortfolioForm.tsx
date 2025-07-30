@@ -49,7 +49,11 @@ export default function CreatePortfolioForm({ onClose, onSubmit }: CreatePortfol
           Authorization: `Bearer ${session.accessToken}`,
           "Content-Type": "application/json",
         },
-        json: { name: portfolioName.trim() },
+        json: { name: portfolioName.trim(), 
+                includeInTotal: includeInTotal,
+                avatarIcon: avatar,
+                avatarColor: color,
+              },
       });
 
       if (!response.ok) throw new Error("Failed to create a new portfolio");

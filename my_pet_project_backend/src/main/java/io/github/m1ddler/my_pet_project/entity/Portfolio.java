@@ -20,6 +20,12 @@ public class Portfolio {
     private BigDecimal totalValue = BigDecimal.ZERO;
     @Column(name = "position")
     private int position;
+    @Column(name = "include_in_total")
+    private boolean includeInTotal;
+    @Column(name = "avatar_icon")
+    private String avatarIcon;
+    @Column(name = "avatar_color")
+    private String avatarColor;
     @ManyToOne
     @JoinColumn(name = "user_id")
     private User user;
@@ -28,9 +34,12 @@ public class Portfolio {
 
     public Portfolio() {}
 
-    public Portfolio(String name, User user) {
+    public Portfolio(String name, User user, boolean includeInTotal, String avatarIcon, String avatarColor) {
         this.name = name;
         this.user = user;
+        this.includeInTotal = includeInTotal;
+        this.avatarIcon = avatarIcon;
+        this.avatarColor = avatarColor;
     }
 
     public List<Transaction> getTransactions() {
@@ -81,11 +90,36 @@ public class Portfolio {
         this.position = position;
     }
 
+    public boolean isIncludeInTotal() {
+        return includeInTotal;
+    }
+
+    public void setIncludeInTotal(boolean includeInTotal) {
+        this.includeInTotal = includeInTotal;
+    }
+
+    public String getAvatarIcon() {
+        return avatarIcon;
+    }
+
+    public void setAvatarIcon(String avatarIcon) {
+        this.avatarIcon = avatarIcon;
+    }
+
+    public String getAvatarColor() {
+        return avatarColor;
+    }
+
+    public void setAvatarColor(String avatarColor) {
+        this.avatarColor = avatarColor;
+    }
+
     @Override
     public String toString() {
         return "Portfolio:\n"+
                 "[Id="+ id +",\n" +
                 "name="+name+",\n" +
-                "totalValue="+totalValue+"]\n";
+                "totalValue="+totalValue+"]\n"
+        ;
     }
 }

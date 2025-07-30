@@ -6,12 +6,7 @@ import {
     type UseSortableArguments,
 } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
-
-interface Portfolio {
-    id: number;
-    name: string;
-    totalValue: number;
-}
+import type { Portfolio } from "./types";
 
 interface SortablePortfolioItemProps {
     portfolio: Portfolio;
@@ -104,18 +99,11 @@ export default function SortablePortfolioItem({
                 aria-label={`Select portfolio ${portfolio.name}`}
                 className="flex flex-1 items-center gap-4 text-left"
             >
-                <div className="flex h-10 w-10 items-center justify-center rounded-full bg-green-500">
-                    <svg
-                        xmlns="http://www.w3.org/2000/svg"
-                        fill="white"
-                        viewBox="0 0 24 24"
-                        className="h-6 w-6"
-                        role="img"
-                        aria-labelledby={`iconTitle-${portfolio.id}`}
-                    >
-                        <title id={`iconTitle-${portfolio.id}`}>User icon</title>
-                        <path d="M12 2C10 2 8.5 4 8.5 6S10 10 12 10 15.5 8 15.5 6 14 2 12 2zm0 12c-2 0-6 1-6 4v2h12v-2c0-3-4-4-6-4z" />
-                    </svg>
+                <div
+                    className="flex h-10 w-10 items-center justify-center rounded-full"
+                    style={{ backgroundColor: portfolio.avatarColor }}
+                >
+                    {portfolio.avatarIcon}
                 </div>
                 <div>
                     {isEditMode ? (

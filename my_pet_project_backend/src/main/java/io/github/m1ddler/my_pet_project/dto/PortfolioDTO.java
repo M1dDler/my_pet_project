@@ -12,12 +12,19 @@ public class PortfolioDTO {
     private String name;
     private BigDecimal totalValue;
     private int position;
+    private boolean includeInTotal;
+    private String avatarIcon;
+    private String avatarColor;
 
-    public PortfolioDTO(long id, String name, BigDecimal totalValue, int position) {
+    public PortfolioDTO(long id, String name, BigDecimal totalValue, int position,
+                        boolean includeInTotal, String avatarIcon, String avatarColor) {
         this.id = id;
         this.name = name;
         this.totalValue = totalValue;
         this.position = position;
+        this.includeInTotal = includeInTotal;
+        this.avatarIcon = avatarIcon;
+        this.avatarColor = avatarColor;
     }
 
     public long getId() {
@@ -50,5 +57,29 @@ public class PortfolioDTO {
 
     public void setPosition(int position) {
         this.position = position;
+    }
+
+    public boolean isIncludeInTotal() {
+        return includeInTotal;
+    }
+
+    public void setIncludeInTotal(boolean includeInTotal) {
+        this.includeInTotal = includeInTotal;
+    }
+
+    public String getAvatarIcon() {
+        return avatarIcon;
+    }
+
+    public void setAvatarIcon(String avatarIcon) {
+        this.avatarIcon = avatarIcon;
+    }
+
+    public String getAvatarColor() {
+        return avatarColor;
+    }
+
+    public void setAvatarColor(String avatarColor) {
+        this.avatarColor = avatarColor;
     }
 }

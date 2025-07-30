@@ -54,7 +54,8 @@ public class PortfolioServiceImpl implements PortfolioService {
     @Override
     public ResponseEntity<PortfolioDTO> saveCurrentUserPortfolio(PortfolioDTO portfolioDTO) {
         User user = userService.getAuthenticatedUser();
-        Portfolio portfolio = new Portfolio(portfolioDTO.getName(), user);
+        Portfolio portfolio = new Portfolio(portfolioDTO.getName(), user, portfolioDTO.isIncludeInTotal(),
+                portfolioDTO.getAvatarIcon(), portfolioDTO.getAvatarColor());
         Integer maxPosition = portfolioRepository.findMaxPositionByUserId(user.getId()).orElse(-1);
         portfolio.setPosition(maxPosition + 1);
         return ResponseEntity.status(HttpStatus.CREATED)
@@ -126,7 +127,10 @@ public class PortfolioServiceImpl implements PortfolioService {
                 portfolio.getId(),
                 portfolio.getName(),
                 portfolio.getTotalValue(),
-                portfolio.getPosition()
+                portfolio.getPosition(),
+                portfolio.isIncludeInTotal(),
+                portfolio.getAvatarIcon(),
+                portfolio.getAvatarColor()
         );
     }
 }

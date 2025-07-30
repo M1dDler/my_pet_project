@@ -36,11 +36,11 @@ export default function Sidebar({
   const sensors = useSensors(useSensor(PointerSensor));
 
   useEffect(() => {
-  if (prevEditMode.current && !isEditMode) {
-    saveOrder();
-  }
-  prevEditMode.current = isEditMode;
-}, [isEditMode, saveOrder]);
+    if (prevEditMode.current && !isEditMode) {
+      saveOrder();
+    }
+    prevEditMode.current = isEditMode;
+  }, [isEditMode, saveOrder]);
 
   if (loading || !Array.isArray(portfolios)) {
     return (
@@ -78,9 +78,12 @@ export default function Sidebar({
             Review
             <div className="text-gray-300 text-xs">
               USD {Array.isArray(portfolios)
-                ? portfolios.reduce((acc, p) => acc + (p.totalValue ?? 0), 0).toLocaleString(undefined, {
-                  minimumFractionDigits: 2,
-                })
+                ? portfolios
+                  .filter(p => p.includeInTotal) // Додаємо фільтрацію
+                  .reduce((acc, p) => acc + (p.totalValue ?? 0), 0)
+                  .toLocaleString(undefined, {
+                    minimumFractionDigits: 2,
+                  })
                 : "0.00"}
             </div>
           </div>
