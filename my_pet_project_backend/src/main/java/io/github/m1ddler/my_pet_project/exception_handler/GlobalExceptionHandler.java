@@ -5,7 +5,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.validation.FieldError;
+import org.springframework.web.HttpMediaTypeNotSupportedException;
 import org.springframework.web.HttpRequestMethodNotSupportedException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
@@ -52,6 +54,14 @@ public class GlobalExceptionHandler {
                                                                                       HttpServletRequest request) {
         log.warn("{} at the path {}", e.getMessage(), request.getRequestURI());
         return buildErrorResponse(e.getMessage(), null, request, HttpStatus.METHOD_NOT_ALLOWED);
+    }
+
+    @ExceptionHandler
+    public ResponseEntity<ErrorResponse> handleHttpMessageNotReadable(HttpMessageNotReadableException e,
+                                                                      HttpServletRequest request) {
+        log.warn("{} at the path {}", e.getMessage(), request.getRequestURI());
+        return buildErrorResponse("Invalid JSON format. Please check your request body", null,
+                request, HttpStatus.BAD_REQUEST);
     }
 
     @ExceptionHandler

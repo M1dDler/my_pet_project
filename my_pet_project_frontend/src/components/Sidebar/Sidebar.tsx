@@ -15,6 +15,7 @@ interface SidebarProps {
   selectedPortfolioId: number | null;
   onOpenCreatePortfolioForm: () => void;
   onRequestDeletePortfolio: (id: number) => void;
+  onRequestEditPortfolio: (portfolioToEdit: Portfolio) => void;
   portfolios: Portfolio[];
   setPortfolios: React.Dispatch<React.SetStateAction<Portfolio[]>>;
   loading: boolean;
@@ -26,6 +27,7 @@ export default function Sidebar({
   selectedPortfolioId,
   onOpenCreatePortfolioForm,
   onRequestDeletePortfolio,
+  onRequestEditPortfolio,
   portfolios,
   setPortfolios,
   loading,
@@ -79,7 +81,7 @@ export default function Sidebar({
             <div className="text-gray-300 text-xs">
               USD {Array.isArray(portfolios)
                 ? portfolios
-                  .filter(p => p.includeInTotal) // Додаємо фільтрацію
+                  .filter(p => p.includeInTotal)
                   .reduce((acc, p) => acc + (p.totalValue ?? 0), 0)
                   .toLocaleString(undefined, {
                     minimumFractionDigits: 2,
@@ -122,6 +124,7 @@ export default function Sidebar({
                 onSelectPortfolio={onSelectPortfolio}
                 isEditMode={isEditMode}
                 onRequestDeletePortfolio={onRequestDeletePortfolio}
+                onRequestEditPortfolio={onRequestEditPortfolio}
               />
             ))}
         </SortableContext>

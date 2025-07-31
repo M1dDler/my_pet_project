@@ -10,6 +10,7 @@ import LineChart from "@/components/LineChart";
 import TransactionsTable from "@/components/AssetsTable";
 import CreatePortfolioForm from "@/components/CreatePortfolioForm";
 import DeletePortfolioForm from "@/components/Sidebar/DeletePortfolioItem";
+import EditPortfolioForm from "@/components/Sidebar/EditPortfolioForm"
 import { usePortfolios } from "@/components/Sidebar/usePortfolios";
 import type { Portfolio } from "@/components/Sidebar/types";
 import type { ToastType } from "types/toastTypes";
@@ -20,23 +21,27 @@ const tabs = [
 ];
 
 export default function UserPage() {
-
-
   const [toastMessage, setToastMessage] = useState("");
   const [toastType, setToastType] = useState<ToastType>("info");
   const [toastDescription, setToastDescription] = useState("")
   const [showToast, setShowToast] = useState(false);
   const { data: session, status } = useSession();
   const [isCreatePortfolioFormOpen, setCreatePortfolioFormOpen] = useState(false);
+  const [isEditPortfolioFormOpen, setEditPortfolioFormOpen] = useState(false);
   const [activeTab, setActiveTab] = useState("overview");
   const [selectedPortfolioId, setSelectedPortfolioId] = useState<number | null>(null);
   const [isDeletePortfolioFormOpen, setDeletePortfolioFormOpen] = useState(false);
   const [portfolioIdToDelete, setPortfolioIdToDelete] = useState<number | null>(null);
-
+  const [portfolioToEdit, setPortfolioToEdit] = useState<Portfolio | null>(null);
   const handleRequestDeletePortfolio = (id: number) => {
     setPortfolioIdToDelete(id);
     setDeletePortfolioFormOpen(true);
   };
+
+  const handleRequestEditPortfolio = (portfolioToEdit: Portfolio) => {
+    setPortfolioToEdit(portfolioToEdit);
+    setEditPortfolioFormOpen(true)
+  }
 
   const {
     portfolios,
@@ -63,6 +68,7 @@ export default function UserPage() {
           selectedPortfolioId={selectedPortfolioId}
           onSelectPortfolio={setSelectedPortfolioId}
           onRequestDeletePortfolio={handleRequestDeletePortfolio}
+          onRequestEditPortfolio={handleRequestEditPortfolio}
           onOpenCreatePortfolioForm={() => setCreatePortfolioFormOpen(true)}
           portfolios={portfolios ?? []}
           setPortfolios={setPortfolios}
@@ -156,7 +162,7 @@ export default function UserPage() {
           </div>
         </main>
       </div>
-      {isCreatePortfolioFormOpen && (
+      {isCreatePortfolioFormOpen && session?.accessToken && (
         <CreatePortfolioForm
           onClose={() => setCreatePortfolioFormOpen(false)}
           onSubmit={(newCreatedPortfolio: Portfolio, includeInTotal: boolean) => {
@@ -184,6 +190,15 @@ export default function UserPage() {
               setSelectedPortfolioId(null);
             }
             setPortfolios((prev) => prev.filter((p) => p.id !== portfolioIdToDelete));
+          }}
+        />
+      )}
+      {isEditPortfolioFormOpen && portfolioToEdit && session?.accessToken && (
+        <EditPortfolioForm
+          portfolioToEdit={portfolioToEdit}
+          onClose={() => setEditPortfolioFormOpen(false)}
+          onSubmit={(_newCreatedPortfolio: Portfolio) => {
+            setEditPortfolioFormOpen(false);
           }}
         />
       )}

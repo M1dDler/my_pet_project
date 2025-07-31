@@ -14,6 +14,7 @@ interface SortablePortfolioItemProps {
     isEditMode: boolean;
     onSelectPortfolio: (id: number | null) => void;
     onRequestDeletePortfolio: (id: number) => void;
+    onRequestEditPortfolio: (portfolioToEdit: Portfolio) => void;
 }
 
 export default function SortablePortfolioItem({
@@ -22,6 +23,7 @@ export default function SortablePortfolioItem({
     onSelectPortfolio,
     isEditMode,
     onRequestDeletePortfolio,
+    onRequestEditPortfolio,
 }: SortablePortfolioItemProps) {
     const { attributes, listeners, setNodeRef, transform, transition } = useSortable({
         id: portfolio.id,
@@ -50,7 +52,7 @@ export default function SortablePortfolioItem({
     }, [menuOpen]);
 
     function handleEdit() {
-        alert(`Edit portfolio ${portfolio.name}`);
+        onRequestEditPortfolio(portfolio);
         setMenuOpen(false);
     }
 
@@ -167,7 +169,7 @@ export default function SortablePortfolioItem({
                                         <path strokeLinecap="round" strokeLinejoin="round" d="M11 5h6m-3 3v12M4 19h12" />
                                         <path strokeLinecap="round" strokeLinejoin="round" d="M16 3a2 2 0 012 2v4" />
                                     </svg>
-                                    Rename
+                                    Edit
                                 </button>
                                 <button
                                     type="button"

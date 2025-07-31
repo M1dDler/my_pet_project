@@ -15,4 +15,5 @@ public interface PortfolioRepository extends JpaRepository<Portfolio, Long> {
     Optional<Integer> findMaxPositionByUserId(Long userId);
     @Query("SELECT p FROM Portfolio p WHERE p.user.id = :userId AND p.id IN :portfolioIds")
     Optional<List<Portfolio>> findPortfoliosByUserIdAndIds(long userId, List<Long> portfolioIds);
+    Integer countByUserId(Long userId);
 }

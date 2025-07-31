@@ -1,5 +1,6 @@
 package io.github.m1ddler.my_pet_project.service.impl;
 
+import io.github.m1ddler.my_pet_project.config.PortfolioProperties;
 import io.github.m1ddler.my_pet_project.dao.PortfolioRepository;
 import io.github.m1ddler.my_pet_project.dto.PortfolioDTO;
 import io.github.m1ddler.my_pet_project.dto.PortfolioPositionDTO;
@@ -12,19 +13,21 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
 public class PortfolioServiceImpl implements PortfolioService {
     private final PortfolioRepository portfolioRepository;
     private final UserService userService;
+    private final PortfolioProperties portfolioProperties;
 
     @Autowired
-    public PortfolioServiceImpl(PortfolioRepository portfolioRepository, UserService userService) {
+    public PortfolioServiceImpl(PortfolioRepository portfolioRepository, UserService userService,
+                                PortfolioProperties portfolioProperties) {
         this.portfolioRepository = portfolioRepository;
         this.userService = userService;
+        this.portfolioProperties = portfolioProperties;
     }
 
 
@@ -54,10 +57,17 @@ public class PortfolioServiceImpl implements PortfolioService {
     @Override
     public ResponseEntity<PortfolioDTO> saveCurrentUserPortfolio(PortfolioDTO portfolioDTO) {
         User user = userService.getAuthenticatedUser();
+
+        if (Objects.equals(countUserPortfolios(user), portfolioProperties.getMaxPortfolioCount())) {
+            return ResponseEntity.status(HttpStatus.CONFLICT).build();
+        }
+
         Portfolio portfolio = new Portfolio(portfolioDTO.getName(), user, portfolioDTO.isIncludeInTotal(),
                 portfolioDTO.getAvatarIcon(), portfolioDTO.getAvatarColor());
+
         Integer maxPosition = portfolioRepository.findMaxPositionByUserId(user.getId()).orElse(-1);
         portfolio.setPosition(maxPosition + 1);
+
         return ResponseEntity.status(HttpStatus.CREATED)
                 .body(portfolioToPortfolioDTO(portfolioRepository.save(portfolio)));
     }
@@ -71,26 +81,63 @@ public class PortfolioServiceImpl implements PortfolioService {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
         }
 
+        boolean changed = false;
+
         if (!portfolioDTO.getName().equals(portfolio.getName())) {
             portfolio.setName(portfolioDTO.getName());
+            changed = true;
+        }
+
+        if (!portfolioDTO.getAvatarIcon().equals(portfolio.getAvatarIcon())) {
+            portfolio.setAvatarIcon(portfolioDTO.getAvatarIcon());
+            changed = true;
+        }
+
+        if (!portfolioDTO.getAvatarColor().equals(portfolio.getAvatarColor())) {
+            portfolio.setAvatarColor(portfolioDTO.getAvatarColor());
+            changed = true;
+        }
+
+        if (changed) {
             portfolioRepository.save(portfolio);
             return ResponseEntity.status(HttpStatus.OK).body(portfolioToPortfolioDTO(portfolio));
         }
-
         return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
     }
 
     @Override
     public ResponseEntity<Void> updateCurrentUserPortfoliosPosition(
             List<PortfolioPositionDTO> portfolioPositions){
+        User user = userService.getAuthenticatedUser();
+        Integer countOfUserPortfolios = countUserPortfolios(user);
+        Set<Integer> uniquePositions = new HashSet<>();
+
+        boolean isInvalid = portfolioPositions.isEmpty()
+                || portfolioPositions.size() > countOfUserPortfolios
+                || portfolioPositions.stream().anyMatch(Objects::isNull)
+                || portfolioPositions.stream().anyMatch(p -> {
+            Integer pos = p.getPosition();
+            return pos == null || !uniquePositions.add(pos);
+        });
+
+        if (isInvalid) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
+        }
+
+        OptionalInt maxPosition = portfolioPositions.stream()
+                .mapToInt(PortfolioPositionDTO::getPosition)
+                .max();
+
+        if (maxPosition.isPresent() && maxPosition.getAsInt() > countOfUserPortfolios) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
+        }
 
         List<Long> portfolioIds = portfolioPositions.stream()
                 .map(PortfolioPositionDTO::getId)
                 .toList();
 
-        List<Portfolio> portfolios = portfolioRepository.findPortfoliosByUserIdAndIds(
-                userService.getAuthenticatedUser().getId(), portfolioIds
-        ).orElse(null);
+        List<Portfolio> portfolios = portfolioRepository.findPortfoliosByUserIdAndIds(user.getId(), portfolioIds)
+                .orElse(null);
 
         if (portfolios == null) {return ResponseEntity.status(HttpStatus.NOT_FOUND).build();}
 
@@ -120,6 +167,10 @@ public class PortfolioServiceImpl implements PortfolioService {
 
         portfolioRepository.delete(portfolio);
         return ResponseEntity.status(HttpStatus.OK).build();
+    }
+
+    private Integer countUserPortfolios(User user) {
+        return portfolioRepository.countByUserId(user.getId());
     }
 
     private PortfolioDTO portfolioToPortfolioDTO(Portfolio portfolio) {

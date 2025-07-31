@@ -1,7 +1,6 @@
 package io.github.m1ddler.my_pet_project.dto;
 
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.Size;
+import jakarta.validation.constraints.*;
 
 import java.math.BigDecimal;
 
@@ -13,7 +12,10 @@ public class PortfolioDTO {
     private BigDecimal totalValue;
     private int position;
     private boolean includeInTotal;
+    @NotBlank(message = "Avatar icon must not be blank")
+    @Size(min = 1, max = 5, message = "Avatar icon must be exactly one character")
     private String avatarIcon;
+    @Pattern(regexp = "^#([A-Fa-f0-9]{6})$", message = "Invalid hex color")
     private String avatarColor;
 
     public PortfolioDTO(long id, String name, BigDecimal totalValue, int position,

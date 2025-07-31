@@ -1,27 +1,26 @@
 "use client";
 
 import { useState } from "react";
-import { Switch } from "@headlessui/react";
 import { XMarkIcon } from "@heroicons/react/24/outline";
 import { getSession } from "next-auth/react";
 import ky from "ky";
-import type { Portfolio } from "./Sidebar/types";
-import AvatarPickerButton from "./Sidebar/AvatarPickerButton";
-import AvatarPickerModal from "./Sidebar/AvatarPickerModal";
-import { Toast } from "./Toast";
+import type { Portfolio } from "./types";
+import AvatarPickerButton from "./AvatarPickerButton";
+import AvatarPickerModal from "./AvatarPickerModal";
+import { Toast } from "../Toast";
 import type { ToastType } from "types/toastTypes";
 
-interface CreatePortfolioModalProps {
+interface EditPortfolioModalProps {
+  portfolioToEdit: Portfolio;
   onClose: () => void;
-  onSubmit: (newCreatedPortfolio: Portfolio, includeInTotal: boolean) => void;
+  onSubmit: (newEditPortfolio: Portfolio) => void;
 }
 
-export default function CreatePortfolioForm({ onClose, onSubmit }: CreatePortfolioModalProps) {
-  const [portfolioName, setPortfolioName] = useState("");
-  const [includeInTotal, setIncludeInTotal] = useState(true);
+export default function EditPortfolioForm({portfolioToEdit, onClose, onSubmit }: EditPortfolioModalProps) {
+  const [portfolioName, setPortfolioName] = useState(portfolioToEdit.name);
   const MAX_LENGTH = 30;
-  const [avatar, setAvatar] = useState("👻");
-  const [color, setColor] = useState("#8b5cf6");
+  const [avatar, setAvatar] = useState(portfolioToEdit.avatarIcon);
+  const [color, setColor] = useState(portfolioToEdit.avatarColor);
   const [showAvatarModal, setShowAvatarModal] = useState(false);
   const [toastMessage, setToastMessage] = useState("");
   const [toastType, setToastType] = useState<ToastType>("info");
@@ -44,36 +43,27 @@ export default function CreatePortfolioForm({ onClose, onSubmit }: CreatePortfol
     }
 
     try {
-      const response = await ky.post("http://localhost:8080/api/v1/users/me/portfolios", {
+      const response = await ky.put(`http://localhost:8080/api/v1/users/me/portfolios/${portfolioToEdit.id}`, {
         headers: {
           Authorization: `Bearer ${session.accessToken}`,
           "Content-Type": "application/json",
         },
-        json: {
-          name: portfolioName.trim(),
-          includeInTotal: includeInTotal,
-          avatarIcon: avatar,
-          avatarColor: color,
-        },
-        throwHttpErrors: false,
+        json: { name: portfolioName.trim(),
+                avatarIcon: avatar,
+                avatarColor: color,
+              },
       });
 
-      if (!response.ok) {
-        if (response.status === 409){
-          setToastMessage("Error");
-          setToastDescription("Portfolio creation limit exceeded")
-          setToastType("error")
-          setShowToast(true)
-          return;
-        }
-      }
+      if (!response.ok) throw new Error("Failed to edit a new portfolio");
 
-      const newCreatedPortfolio = await response.json() as Portfolio
-
-      onSubmit(newCreatedPortfolio, includeInTotal);
+      const newEditedPortfolio = await response.json() as Portfolio
+      portfolioToEdit.name = newEditedPortfolio.name;
+      portfolioToEdit.avatarIcon = newEditedPortfolio.avatarIcon;
+      portfolioToEdit.avatarColor = newEditedPortfolio.avatarColor;
+      onSubmit(newEditedPortfolio);
       setPortfolioName("");
     } catch (_) {
-      alert("Failed to create a new portfolio");
+      alert("Failed to edit a new portfolio");
     }
   };
 
@@ -110,7 +100,7 @@ export default function CreatePortfolioForm({ onClose, onSubmit }: CreatePortfol
           </button>
 
           <h2 className="mb-4 font-semibold text-gray-900 text-xl dark:text-white">
-            Create New Portfolio
+            Edit Current Portfolio
           </h2>
 
           <div className="flex items-center">
@@ -142,34 +132,12 @@ export default function CreatePortfolioForm({ onClose, onSubmit }: CreatePortfol
             {portfolioName.length}/{MAX_LENGTH} characters
           </div>
 
-          <div className="border-gray-700 border-t">
-            <div className="mt-2 mb-4 flex items-center justify-between">
-              <div className="flex flex-col">
-                <span className="font-semibold text-gray-700 text-sm dark:text-gray-300">
-                  Count as my portfolio
-                </span>
-                <span className="text-gray-500 text-xs dark:text-gray-400">
-                  Assets in this portfolio will be included in total value
-                </span>
-              </div>
-              <Switch
-                checked={includeInTotal}
-                onChange={setIncludeInTotal}
-                className={`${includeInTotal ? "bg-blue-600" : "bg-gray-400"} relative inline-flex h-6 w-11 items-center rounded-full transition-colors`}
-              >
-                <span
-                  className={`${includeInTotal ? "translate-x-6" : "translate-x-1"} inline-block h-4 w-4 transform rounded-full bg-white transition-transform`}
-                />
-              </Switch>
-            </div>
-          </div>
-
           <button
             onClick={handleSubmit}
             className="w-full rounded-md bg-blue-600 px-4 py-2 font-medium text-sm text-white transition hover:bg-blue-700"
             type="button"
           >
-            Create Portfolio
+            Edit Portfolio
           </button>
         </div>
       )}
