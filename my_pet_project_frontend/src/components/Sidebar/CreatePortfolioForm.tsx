@@ -5,10 +5,10 @@ import { Switch } from "@headlessui/react";
 import { XMarkIcon } from "@heroicons/react/24/outline";
 import { getSession } from "next-auth/react";
 import ky from "ky";
-import type { Portfolio } from "./Sidebar/types";
-import AvatarPickerButton from "./Sidebar/AvatarPickerButton";
-import AvatarPickerModal from "./Sidebar/AvatarPickerModal";
-import { Toast } from "./Toast";
+import type { Portfolio } from "./types";
+import AvatarPickerButton from "./AvatarPickerButton";
+import AvatarPickerModal from "./AvatarPickerModal";
+import { Toast } from "../Toast";
 import type { ToastType } from "types/toastTypes";
 
 interface CreatePortfolioModalProps {

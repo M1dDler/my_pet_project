@@ -12,7 +12,7 @@ interface SortablePortfolioItemProps {
     portfolio: Portfolio;
     isActive: boolean;
     isEditMode: boolean;
-    onSelectPortfolio: (id: number | null) => void;
+    onSelectPortfolio: (portfolio: Portfolio | null) => void;
     onRequestDeletePortfolio: (id: number) => void;
     onRequestEditPortfolio: (portfolioToEdit: Portfolio) => void;
 }
@@ -97,7 +97,7 @@ export default function SortablePortfolioItem({
 
             <button
                 type="button"
-                onClick={isEditMode ? undefined : () => onSelectPortfolio(portfolio.id)}
+                onClick={isEditMode ? undefined : () => onSelectPortfolio(portfolio)}
                 aria-label={`Select portfolio ${portfolio.name}`}
                 className="flex flex-1 items-center gap-4 text-left"
             >

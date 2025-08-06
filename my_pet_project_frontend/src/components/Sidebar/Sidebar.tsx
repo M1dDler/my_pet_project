@@ -11,8 +11,8 @@ import handleDragEnd from "./usePortfolioDrag";
 import type { Portfolio } from "./types";
 
 interface SidebarProps {
-  onSelectPortfolio: (id: number | null) => void;
-  selectedPortfolioId: number | null;
+  onSelectPortfolio: (portfolio: Portfolio | null) => void;
+  selectedPortfolio: Portfolio | null;
   onOpenCreatePortfolioForm: () => void;
   onRequestDeletePortfolio: (id: number) => void;
   onRequestEditPortfolio: (portfolioToEdit: Portfolio) => void;
@@ -24,7 +24,7 @@ interface SidebarProps {
 
 export default function Sidebar({
   onSelectPortfolio,
-  selectedPortfolioId,
+  selectedPortfolio,
   onOpenCreatePortfolioForm,
   onRequestDeletePortfolio,
   onRequestEditPortfolio,
@@ -54,7 +54,7 @@ export default function Sidebar({
 
   return (
     <div className="hidden h-full w-80 min-w-[320px] flex-col overflow-hidden bg-[#1a1a1a] p-5 text-white md:flex">
-      <div className={`relative mb-4 flex items-center gap-4 rounded-lg p-2 text-left ${selectedPortfolioId === null
+      <div className={`relative mb-4 flex items-center gap-4 rounded-lg p-2 text-left ${selectedPortfolio === null
         ? "bg-gray-700 bg-opacity-40 hover:bg-gray-800"
         : "bg-[#1a1a1a] hover:bg-gray-800"
         } hover:bg-opacity-60`}
@@ -120,7 +120,7 @@ export default function Sidebar({
               <SortablePortfolioItem
                 key={portfolio.id}
                 portfolio={portfolio}
-                isActive={selectedPortfolioId === portfolio.id}
+                isActive={selectedPortfolio != null && selectedPortfolio.id === portfolio.id}
                 onSelectPortfolio={onSelectPortfolio}
                 isEditMode={isEditMode}
                 onRequestDeletePortfolio={onRequestDeletePortfolio}

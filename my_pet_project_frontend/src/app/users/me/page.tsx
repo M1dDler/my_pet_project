@@ -8,11 +8,12 @@ import LoadingSpinner from "@/components/LoadingSpinner";
 import DountChart from "@/components/DountChart";
 import LineChart from "@/components/LineChart";
 import TransactionsTable from "@/components/AssetsTable";
-import CreatePortfolioForm from "@/components/CreatePortfolioForm";
+import CreatePortfolioForm from "@/components/Sidebar/CreatePortfolioForm";
 import DeletePortfolioForm from "@/components/Sidebar/DeletePortfolioItem";
 import EditPortfolioForm from "@/components/Sidebar/EditPortfolioForm"
+import CreateTransactionForm from "@/components/Dashboard/CreateTransactionForm";
 import { usePortfolios } from "@/components/Sidebar/usePortfolios";
-import type { Portfolio } from "@/components/Sidebar/types";
+import type { Portfolio, Transaction } from "@/components/Sidebar/types";
 import type { ToastType } from "types/toastTypes";
 
 const tabs = [
@@ -28,8 +29,9 @@ export default function UserPage() {
   const { data: session, status } = useSession();
   const [isCreatePortfolioFormOpen, setCreatePortfolioFormOpen] = useState(false);
   const [isEditPortfolioFormOpen, setEditPortfolioFormOpen] = useState(false);
+  const [isCreateTransactionFormOpen, setCreateTransactionFormOpen] = useState(false);
   const [activeTab, setActiveTab] = useState("overview");
-  const [selectedPortfolioId, setSelectedPortfolioId] = useState<number | null>(null);
+  const [selectedPortfolio, setSelectedPortfolio] = useState<Portfolio | null>(null);
   const [isDeletePortfolioFormOpen, setDeletePortfolioFormOpen] = useState(false);
   const [portfolioIdToDelete, setPortfolioIdToDelete] = useState<number | null>(null);
   const [portfolioToEdit, setPortfolioToEdit] = useState<Portfolio | null>(null);
@@ -65,8 +67,8 @@ export default function UserPage() {
       )}
       <div className="flex flex-1">
         <Sidebar
-          selectedPortfolioId={selectedPortfolioId}
-          onSelectPortfolio={setSelectedPortfolioId}
+          selectedPortfolio={selectedPortfolio}
+          onSelectPortfolio={setSelectedPortfolio}
           onRequestDeletePortfolio={handleRequestDeletePortfolio}
           onRequestEditPortfolio={handleRequestEditPortfolio}
           onOpenCreatePortfolioForm={() => setCreatePortfolioFormOpen(true)}
@@ -77,40 +79,33 @@ export default function UserPage() {
         />
 
         <main className="flex min-w-0 max-w-full grow flex-col overflow-x-auto bg-gray-900 px-3 py-3">
-          {selectedPortfolioId && (
-            <div className="mb-4 text-gray-400 text-sm">
-              Portfolio ID: {selectedPortfolioId}
-            </div>
-          )}
           <div className="flex">
             <div className="mb-6">
 
               <div className="w-fit rounded-xl p-4 text-white">
                 <div className="mb-2 flex items-center gap-2 text-gray-400">
-                  <div className="flex h-6 w-6 items-center justify-center rounded-full bg-green-500">
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      fill="white"
-                      viewBox="0 0 24 24"
-                      className="h-4 w-4"
-                    >
-                      <title id="iconTitle">User icon</title>
-                      <path d="M12 2C10 2 8.5 4 8.5 6S10 10 12 10 15.5 8 15.5 6 14 2 12 2zm0 12c-2 0-6 1-6 4v2h12v-2c0-3-4-4-6-4z" />
-                    </svg>
+                  <div className="flex h-7 w-7 items-center justify-center rounded-full"
+                    style={{ backgroundColor: selectedPortfolio?.avatarColor }}>
+                    {selectedPortfolio?.avatarIcon}
                   </div>
-                  <span>MyPortfolio</span>
+                  <span>{selectedPortfolio?.name}</span>
                 </div>
-                <div className="mb-2 font-semibold text-4xl text-white">UAH 2,728,786.88</div>
+                <div className="mb-2 font-semibold text-4xl text-white">UAH {selectedPortfolio?.totalValue}</div>
                 <div className="text-green-400">
                   +UAH 6,250.57 <span>▲ 0.23% (24г)</span>
                 </div>
               </div>
 
+              {selectedPortfolio?.id && (
               <div className="px-3">
-                <button className="rounded-lg bg-blue-600 px-4 py-2 font-medium text-sm text-white shadow-md transition hover:bg-blue-700" type="button">
+                <button className="rounded-lg bg-blue-600 px-4 py-2 font-medium text-sm text-white shadow-md transition duration-200 hover:bg-blue-700 hover:brightness-120 active:scale-95"
+                  type="button"
+                  onClick={() => {setCreateTransactionFormOpen(true)}}>
                   Add Transaction
                 </button>
               </div>
+              )
+            }
 
             </div>
             <div className="my-3 ml-auto hidden sm:flex">
@@ -170,7 +165,7 @@ export default function UserPage() {
             setToastDescription("Portfolio created successfully")
             setToastType("success")
             setShowToast(true);
-            setSelectedPortfolioId(newCreatedPortfolio.id);
+            setSelectedPortfolio(newCreatedPortfolio);
             setPortfolios((prev) => [...prev, newCreatedPortfolio]);
             setCreatePortfolioFormOpen(false);
           }}
@@ -186,8 +181,8 @@ export default function UserPage() {
             setToastType("success")
             setShowToast(true);
             setPortfolioIdToDelete(null);
-            if (portfolioIdToDelete === selectedPortfolioId) {
-              setSelectedPortfolioId(null);
+            if (selectedPortfolio != null && portfolioIdToDelete === selectedPortfolio.id) {
+              setSelectedPortfolio(null);
             }
             setPortfolios((prev) => prev.filter((p) => p.id !== portfolioIdToDelete));
           }}
@@ -197,8 +192,20 @@ export default function UserPage() {
         <EditPortfolioForm
           portfolioToEdit={portfolioToEdit}
           onClose={() => setEditPortfolioFormOpen(false)}
-          onSubmit={(_newCreatedPortfolio: Portfolio) => {
+          onSubmit={(_editedPortfolio: Portfolio) => {
             setEditPortfolioFormOpen(false);
+          }}
+        />
+      )}
+      {isCreateTransactionFormOpen && selectedPortfolio?.id && session?.accessToken && (
+        <CreateTransactionForm
+          portfolio={selectedPortfolio}
+          onClose={() => setCreateTransactionFormOpen(false)}
+          onCreated={(_newCreatedTransaction: Transaction) => {
+            setToastMessage("Created");
+            setToastDescription("Transaction created successfully");
+            setToastType("success")
+            setShowToast(true)
           }}
         />
       )}

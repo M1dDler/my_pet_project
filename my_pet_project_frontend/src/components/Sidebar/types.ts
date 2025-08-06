@@ -7,3 +7,13 @@ export interface Portfolio {
   avatarIcon: string;
   avatarColor: string;
 }
+
+export interface Transaction {
+  id: number;
+  coinName: string;
+  quantity: string;
+  pricePerUnit: string;
+  transactionDate: string;
+  fee: string;
+  note: string;
+}
