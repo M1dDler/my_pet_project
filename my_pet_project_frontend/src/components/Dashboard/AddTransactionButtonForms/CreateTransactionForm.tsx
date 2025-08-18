@@ -4,7 +4,9 @@ import { useState } from "react";
 import { getSession } from "next-auth/react";
 import ky from "ky";
 import { XMarkIcon, PencilIcon } from "@heroicons/react/24/outline";
-import type { Transaction, Portfolio } from "../Sidebar/types";
+import type { Transaction, Portfolio } from "../../Sidebar/types";
+import FeeTransactionForm from "./FeeTransactionForm";
+import NoteTransactionForm from "./NoteTransactionForm";
 
 interface CreateTransactionFormProps {
     portfolio: Portfolio & { id: number };
@@ -28,13 +30,18 @@ export default function CreateTransactionForm({
     });
 
     const [loading, setLoading] = useState(false);
+    const [showFeeForm, setShowFeeForm] = useState(false);
+    const [showNoteForm, setShowNoteForm] = useState(false);
+
     const quantityNum = Number.parseFloat(form.quantity) || 0;
     const priceNum = Number.parseFloat(form.pricePerUnit) || 0;
     const feeNum = Number.parseFloat(form.fee) || 0;
     const totalSpent = quantityNum * priceNum - feeNum;
 
     const handleChange = (
-        e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>
+        e: React.ChangeEvent<
+            HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement
+        >
     ) => {
         const { name, value } = e.target;
         setForm((prev) => ({ ...prev, [name]: value }));
@@ -65,7 +72,8 @@ export default function CreateTransactionForm({
                 return;
             }
 
-            const newTransaction = (await responseNewTransactionData.json()) as Transaction;
+            const newTransaction =
+                (await responseNewTransactionData.json()) as Transaction;
             onCreated(newTransaction);
             onClose();
         } catch (_) {
@@ -73,6 +81,26 @@ export default function CreateTransactionForm({
             setLoading(false);
         }
     };
+
+    if (showFeeForm) {
+        return (
+            <FeeTransactionForm
+                initialFee={form.fee}
+                onClose={() => setShowFeeForm(false)}
+                onSave={(newFee) => setForm((prev) => ({ ...prev, fee: newFee }))}
+            />
+        );
+    }
+
+    if (showNoteForm) {
+        return (
+            <NoteTransactionForm
+                initialNote={form.note}
+                onClose={() => setShowNoteForm(false)}
+                onSave={(newNote) => setForm((prev) => ({ ...prev, note: newNote }))}
+            />
+        );
+    }
 
     return (
         <div className="fixed inset-0 z-50 flex items-center justify-center">
@@ -86,15 +114,18 @@ export default function CreateTransactionForm({
                     <XMarkIcon className="h-6 w-6" />
                 </button>
 
-                <h2 className="mb-5 font-semibold text-white text-xl">Add Transaction</h2>
+                <h2 className="mb-5 font-semibold text-white text-xl">
+                    Add Transaction
+                </h2>
 
-                {/* Кнопки-перемикачі для типу транзакції */}
                 <div className="mb-6 flex gap-3">
                     {["Buy", "Sell", "Transfer"].map((type) => (
                         <button
                             key={type}
                             type="button"
-                            onClick={() => setForm((prev) => ({ ...prev, transactionType: type }))}
+                            onClick={() =>
+                                setForm((prev) => ({ ...prev, transactionType: type }))
+                            }
                             className={`flex-1 rounded-md px-4 py-2 font-medium text-sm transition duration-50 hover:brightness-120 active:scale-95 ${form.transactionType === type
                                 ? "bg-blue-600 text-white"
                                 : "bg-gray-700 text-gray-300 hover:bg-gray-600"
@@ -145,7 +176,9 @@ export default function CreateTransactionForm({
                             step={0.01}
                             min={0}
                         />
-                        <span className="-translate-y-1/2 pointer-events-none absolute top-1/2 left-3 select-none text-white">$</span>
+                        <span className="-translate-y-1/2 pointer-events-none absolute top-1/2 left-3 select-none text-white">
+                            $
+                        </span>
                     </div>
 
                     <div className="flex items-center gap-3">
@@ -161,30 +194,39 @@ export default function CreateTransactionForm({
 
                         <button
                             type="button"
-                            className="flex items-center gap-1 rounded-md bg-gray-700 px-3 py-2 text-sm text-white shadow-sm transition duration-50 hover:bg-gray-600 hover:brightness-120 active:scale-95"
+                            onClick={() => setShowFeeForm(true)}
+                            className={`flex items-center gap-1 rounded-md px-3 py-2 text-sm text-white shadow-sm transition duration-50 active:scale-95 ${Number(form.fee) !== 0 ? "bg-blue-600 hover:bg-blue-700" : "bg-gray-700 hover:bg-gray-600"}`
+                            }
                         >
-                            $Fee
+                            {Number(form.fee) !== 0 ? (`$${Number(form.fee).toFixed(3).slice(0, 4)}`) : "$Fee"}
                         </button>
 
                         <button
                             type="button"
-                            className="flex items-center gap-1 rounded-md bg-gray-700 px-3 py-2 text-sm text-white shadow-sm transition duration-50 hover:bg-gray-600 hover:brightness-120 active:scale-95"
+                            onClick={() => setShowNoteForm(true)}
+                            className={`flex items-center gap-1 rounded-md px-3 py-2 text-sm text-white shadow-sm transition duration-50 active:scale-95 ${form.note ? "bg-blue-600 hover:bg-blue-700" : "bg-gray-700 hover:bg-gray-600"}`
+                            }
                         >
-                            <PencilIcon className="h-4 w-4" /> Notes
+                            <PencilIcon className="h-4 w-4" />
+                            Notes
                         </button>
                     </div>
 
                     <div className="flex rounded-md bg-gray-700 p-2.5 text-center font-semibold text-md text-white">
                         <div>Total Spent:</div>
                         <div className="ml-auto">
-                            <span className="text-white">{totalSpent.toFixed(2)} $</span>
+                            <span className="text-white">
+                                <span className="text-white">
+                                    {totalSpent.toLocaleString(undefined, { maximumFractionDigits: 18 })} $
+                                </span>
+                            </span>
                         </div>
                     </div>
 
                     <button
                         onClick={handleSubmit}
                         disabled={loading}
-                        className="mt-3 w-full rounded-md bg-blue-600 px-4 py-2 font-medium text-sm text-white transition duration-50 hover:bg-blue-700 hover:brightness-120 active:scale-95"
+                        className="mt-3 w-full rounded-md bg-blue-600 px-4 py-2 font-medium text-sm text-white transition duration-50 hover:bg-blue-700 active:scale-95"
                         type="button"
                     >
                         {loading ? "Adding..." : "Add Transaction"}

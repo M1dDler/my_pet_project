@@ -11,7 +11,7 @@ import TransactionsTable from "@/components/AssetsTable";
 import CreatePortfolioForm from "@/components/Sidebar/CreatePortfolioForm";
 import DeletePortfolioForm from "@/components/Sidebar/DeletePortfolioItem";
 import EditPortfolioForm from "@/components/Sidebar/EditPortfolioForm"
-import CreateTransactionForm from "@/components/Dashboard/CreateTransactionForm";
+import CreateTransactionForm from "@/components/Dashboard/AddTransactionButtonForms/CreateTransactionForm";
 import { usePortfolios } from "@/components/Sidebar/usePortfolios";
 import type { Portfolio, Transaction } from "@/components/Sidebar/types";
 import type { ToastType } from "types/toastTypes";
