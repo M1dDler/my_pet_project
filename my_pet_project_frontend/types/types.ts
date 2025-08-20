@@ -1,3 +1,5 @@
+export type ToastType = "info" | "success" | "warning" | "error";
+
 export interface Portfolio {
   id: number;
   name: string;
@@ -16,4 +18,9 @@ export interface Transaction {
   transactionDate: string;
   fee: string;
   note: string;
+}
+
+export interface CoinQuantity {
+  coinName: string;
+  quantity: number;
 }

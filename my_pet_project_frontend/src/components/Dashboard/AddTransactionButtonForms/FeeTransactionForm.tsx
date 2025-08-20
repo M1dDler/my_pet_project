@@ -39,30 +39,34 @@ export default function FeeTransactionForm({
                     </h2>
                 </div>
 
-                <div className="space-y-4">
-                    <div className="relative">
-                        <input
-                            type="number"
-                            step="0.0001"
-                            min="0"
-                            value={fee}
-                            onChange={(e) => setFee(e.target.value)}
-                            placeholder="Enter fee"
-                            className="w-full rounded-md border border-gray-300 bg-gray-700 py-2 pr-3 pl-8 text-sm text-white shadow-sm"
-                        />
-                        <span className="-translate-y-1/2 pointer-events-none absolute top-1/2 left-3 select-none text-white">
-                            $
-                        </span>
-                    </div>
 
-                    <button
-                        onClick={handleSave}
-                        type="button"
-                        className="w-full rounded-md bg-blue-600 px-4 py-2 font-medium text-sm text-white transition duration-50 hover:bg-blue-700 active:scale-95"
-                    >
-                        Save Fee
-                    </button>
+                <div className="relative">
+                    <input
+                        type="number"
+                        step="0.0001"
+                        min="0"
+                        value={fee}
+                        onChange={(e) => setFee(e.target.value)}
+                        placeholder="Enter fee"
+                        className="w-full rounded-md border border-gray-300 bg-gray-700 py-2 pr-3 pl-8 text-sm text-white shadow-sm"
+                    />
+                    <span className="-translate-y-1/2 pointer-events-none absolute top-1/2 left-3 select-none text-white">
+                        $
+                    </span>
                 </div>
+
+                <div className="mt-1 mb-4 ml-1 text-left text-gray-400 text-xs">
+                    Enter the transaction fee (if applicable)
+                </div>
+
+                <button
+                    onClick={handleSave}
+                    type="button"
+                    className="w-full rounded-md bg-blue-600 px-4 py-2 font-medium text-sm text-white transition duration-50 hover:bg-blue-700 active:scale-95"
+                >
+                    Save Fee
+                </button>
+                
             </div>
         </div>
     );

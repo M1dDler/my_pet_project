@@ -2,28 +2,40 @@
 
 import { useState } from "react";
 import { getSession } from "next-auth/react";
-import ky from "ky";
 import { XMarkIcon, PencilIcon } from "@heroicons/react/24/outline";
-import type { Transaction, Portfolio } from "../../Sidebar/types";
+import type { Transaction, Portfolio } from "types/types";
 import FeeTransactionForm from "./FeeTransactionForm";
 import NoteTransactionForm from "./NoteTransactionForm";
+import { createTransaction } from "@/app/api/transactions";
 
 interface CreateTransactionFormProps {
     portfolio: Portfolio & { id: number };
     onClose: () => void;
     onCreated: (newTransaction: Transaction) => void;
+    onError?: (message: string) => void;
 }
 
 export default function CreateTransactionForm({
     portfolio,
     onClose,
     onCreated,
+    onError,
 }: CreateTransactionFormProps) {
-    const [form, setForm] = useState({
+    const [form, setForm] = useState<{
+        transactionType: string;
+        coinName: string;
+        quantity: string;
+        pricePerUnit: string;
+        transferType?: string;
+        transactionDate: string;
+        fee: string;
+        note: string;
+    }>({
         transactionType: "Buy",
         coinName: "BTC",
         quantity: "",
-        pricePerUnit: "",
+        pricePerUnit: "0",
+        transferType: "TransferIn",
         transactionDate: new Date().toISOString().slice(0, 16),
         fee: "0",
         note: "",
@@ -36,7 +48,13 @@ export default function CreateTransactionForm({
     const quantityNum = Number.parseFloat(form.quantity) || 0;
     const priceNum = Number.parseFloat(form.pricePerUnit) || 0;
     const feeNum = Number.parseFloat(form.fee) || 0;
-    const totalSpent = quantityNum * priceNum - feeNum;
+
+    let transactionTotalValue = 0;
+    if (form.transactionType === "Buy") {
+        transactionTotalValue = quantityNum * priceNum + feeNum;
+    } else if (form.transactionType === "Sell") {
+        transactionTotalValue = quantityNum * priceNum - feeNum;
+    }
 
     const handleChange = (
         e: React.ChangeEvent<
@@ -49,35 +67,38 @@ export default function CreateTransactionForm({
 
     const handleSubmit = async () => {
         setLoading(true);
+
         try {
             const session = await getSession();
             if (!session?.accessToken) {
-                setLoading(false);
                 return;
             }
 
-            const responseNewTransactionData = await ky.post(
-                `http://localhost:8080/api/v1/users/me/portfolios/${portfolio.id}/transactions`,
-                {
-                    headers: {
-                        Authorization: `Bearer ${session.accessToken}`,
-                        "Content-Type": "application/json",
-                    },
-                    json: form,
+            let payload = { ...form };
+            if (form.transactionType === "Transfer") {
+                if (form.transferType === undefined) {
+                    onError?.("Transfer type error");
+                    return
                 }
-            );
+                payload = {
+                    ...form,
+                    transactionType: form.transferType,
+                };
+                delete payload.transferType;
+            }
 
-            if (!responseNewTransactionData.ok) {
-                setLoading(false);
+            const newTransaction = createTransaction(portfolio.id, payload, session.accessToken);
+
+            if (!newTransaction) {
+                onError?.("Transaction creation failed");
                 return;
             }
 
-            const newTransaction =
-                (await responseNewTransactionData.json()) as Transaction;
-            onCreated(newTransaction);
-            onClose();
+            onCreated(await newTransaction);
         } catch (_) {
+            onError?.("Failed to create transaction");
         } finally {
+            onClose();
             setLoading(false);
         }
     };
@@ -165,21 +186,34 @@ export default function CreateTransactionForm({
                         />
                     </div>
 
-                    <div className="relative">
-                        <input
-                            type="number"
-                            name="pricePerUnit"
-                            value={form.pricePerUnit}
+                    {form.transactionType === "Transfer" ? (
+                        <select
+                            id="transferType"
+                            name="transferType"
+                            value={form.transferType}
                             onChange={handleChange}
-                            placeholder="Price per coin"
-                            className="w-full rounded-md border border-gray-300 bg-gray-700 py-2 pr-3 pl-8 text-sm text-white shadow-sm"
-                            step={0.01}
-                            min={0}
-                        />
-                        <span className="-translate-y-1/2 pointer-events-none absolute top-1/2 left-3 select-none text-white">
-                            $
-                        </span>
-                    </div>
+                            className="w-full rounded-md border border-gray-300 bg-gray-700 px-3 py-2 text-sm text-white shadow-sm"
+                        >
+                            <option value="TransferIn">Transfer In</option>
+                            <option value="TransferOut">Transfer Out</option>
+                        </select>
+                    ) : (
+                        <div className="relative">
+                            <input
+                                type="number"
+                                name="pricePerUnit"
+                                value={form.pricePerUnit}
+                                onChange={handleChange}
+                                placeholder="Price per coin"
+                                className="w-full rounded-md border border-gray-300 bg-gray-700 py-2 pr-3 pl-8 text-sm text-white shadow-sm"
+                                step={0.01}
+                                min={0}
+                            />
+                            <span className="-translate-y-1/2 pointer-events-none absolute top-1/2 left-3 select-none text-white">
+                                $
+                            </span>
+                        </div>
+                    )}
 
                     <div className="flex items-center gap-3">
                         <input
@@ -195,33 +229,38 @@ export default function CreateTransactionForm({
                         <button
                             type="button"
                             onClick={() => setShowFeeForm(true)}
-                            className={`flex items-center gap-1 rounded-md px-3 py-2 text-sm text-white shadow-sm transition duration-50 active:scale-95 ${Number(form.fee) !== 0 ? "bg-blue-600 hover:bg-blue-700" : "bg-gray-700 hover:bg-gray-600"}`
-                            }
+                            className={`flex items-center gap-1 rounded-md px-3 py-2 text-sm text-white shadow-sm transition duration-50 active:scale-95 ${Number(form.fee) !== 0 ? "bg-blue-600 hover:bg-blue-700" : "bg-gray-700 hover:bg-gray-600"}`}
                         >
-                            {Number(form.fee) !== 0 ? (`$${Number(form.fee).toFixed(3).slice(0, 4)}`) : "$Fee"}
+                            {Number(form.fee) !== 0
+                                ? `$${Number(form.fee).toFixed(3).slice(0, 4)}`
+                                : "$Fee"}
                         </button>
 
                         <button
                             type="button"
                             onClick={() => setShowNoteForm(true)}
-                            className={`flex items-center gap-1 rounded-md px-3 py-2 text-sm text-white shadow-sm transition duration-50 active:scale-95 ${form.note ? "bg-blue-600 hover:bg-blue-700" : "bg-gray-700 hover:bg-gray-600"}`
-                            }
+                            className={`flex items-center gap-1 rounded-md px-3 py-2 text-sm text-white shadow-sm transition duration-50 active:scale-95 ${form.note ? "bg-blue-600 hover:bg-blue-700" : "bg-gray-700 hover:bg-gray-600"}`}
                         >
                             <PencilIcon className="h-4 w-4" />
                             Notes
                         </button>
                     </div>
 
-                    <div className="flex rounded-md bg-gray-700 p-2.5 text-center font-semibold text-md text-white">
-                        <div>Total Spent:</div>
-                        <div className="ml-auto">
-                            <span className="text-white">
+                    {form.transactionType !== "Transfer" && (
+                        <div className="flex rounded-md bg-gray-700 p-2.5 text-center font-semibold text-md text-white">
+                            <div>
+                                {form.transactionType === "Buy" ? "Total Spent" : "Total Received"}
+                            </div>
+                            <div className="ml-auto">
                                 <span className="text-white">
-                                    {totalSpent.toLocaleString(undefined, { maximumFractionDigits: 18 })} $
+                                    {transactionTotalValue.toLocaleString(undefined, {
+                                        maximumFractionDigits: 7,
+                                    })}{" "}
+                                    $
                                 </span>
-                            </span>
+                            </div>
                         </div>
-                    </div>
+                    )}
 
                     <button
                         onClick={handleSubmit}

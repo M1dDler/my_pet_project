@@ -8,7 +8,7 @@ import type { Portfolio } from "./types";
 import AvatarPickerButton from "./AvatarPickerButton";
 import AvatarPickerModal from "./AvatarPickerModal";
 import { Toast } from "../Toast";
-import type { ToastType } from "types/toastTypes";
+import type { ToastType } from "types/types";
 
 interface EditPortfolioModalProps {
   portfolioToEdit: Portfolio;
