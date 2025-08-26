@@ -2,6 +2,8 @@ package io.github.m1ddler.my_pet_project.service.impl;
 
 import io.github.m1ddler.my_pet_project.dao.PortfolioRepository;
 import io.github.m1ddler.my_pet_project.dao.TransactionRepository;
+import io.github.m1ddler.my_pet_project.dto.CoinQuantityDTO;
+import io.github.m1ddler.my_pet_project.dto.PagedResponseDTO;
 import io.github.m1ddler.my_pet_project.dto.TransactionDTO;
 import io.github.m1ddler.my_pet_project.entity.Portfolio;
 import io.github.m1ddler.my_pet_project.entity.Transaction;
@@ -9,12 +11,15 @@ import io.github.m1ddler.my_pet_project.service.interfaces.TransactionService;
 import io.github.m1ddler.my_pet_project.service.interfaces.UserService;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -36,21 +41,24 @@ public class TransactionServiceImpl implements TransactionService {
     Logger log = LoggerFactory.getLogger(getClass());
 
     @Override
-    public ResponseEntity<List<TransactionDTO>> getCurrentUserTransactionsByPortfolioId(Long portfolioId) {
-        Portfolio portfolio = portfolioRepository.findByUserIdAndId(userService.getAuthenticatedUser().getId(), portfolioId)
+    public ResponseEntity<PagedResponseDTO<TransactionDTO>> getCurrentUserTransactionsByPortfolioId(Long portfolioId,
+                                                                             int page, int size, String transactionType, String coinName) {
+        Portfolio portfolio = portfolioRepository
+                .findByUserIdAndId(userService.getAuthenticatedUser().getId(), portfolioId)
                 .orElse(null);
 
         if (portfolio == null) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
         }
 
-        List<Transaction> transactions = transactionRepository.findAllByPortfolioId(portfolioId);
+        Page<Transaction> transactions = transactionRepository.findAllByPortfolioId(
+                portfolioId, transactionType, coinName, PageRequest.of(page, size)
+        );
 
-        List<TransactionDTO> transactionsDTO = transactions.stream()
-                .map(this::transactionToDTO)
-                .collect(Collectors.toList());
+        Page<TransactionDTO> transactionsPageDTO = transactions.map(this::transactionToDTO);
+        PagedResponseDTO<TransactionDTO> pagedResponse = PagedResponseDTO.from(transactionsPageDTO);
 
-        return ResponseEntity.status(HttpStatus.OK).body(transactionsDTO);
+        return ResponseEntity.status(HttpStatus.OK).body(pagedResponse);
     }
 
     @Override
@@ -75,8 +83,12 @@ public class TransactionServiceImpl implements TransactionService {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
         }
 
+        if (Objects.equals(tDTO.getTransactionType(), "Sell") || Objects.equals(tDTO.getTransactionType(), "TransferOut")) {
+            tDTO.setQuantity(tDTO.getQuantity().abs().negate());
+        }
+
         Transaction transaction = new Transaction(tDTO.getCoinName(), tDTO.getQuantity(), tDTO.getPricePerUnit(),
-                tDTO.getTransactionDate(), tDTO.getFee(), tDTO.getNote(), portfolio);
+                tDTO.getTransactionDate(), tDTO.getFee(), tDTO.getNote(), portfolio, tDTO.getTransactionType());
 
         Transaction savedTransaction = transactionRepository.save(transaction);
         BigDecimal transactionPrice = savedTransaction.getPricePerUnit().multiply(savedTransaction.getQuantity())
@@ -123,6 +135,14 @@ public class TransactionServiceImpl implements TransactionService {
         return ResponseEntity.status(HttpStatus.OK).build();
     }
 
+    @Override
+    public ResponseEntity<List <CoinQuantityDTO>> getCurrentUserCoinsQuantitiesFromTransactions(Long portfolioId) {
+        if (!portfolioRepository.existsByUserIdAndId(userService.getAuthenticatedUser().getId(), portfolioId)){
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+        }
+        List<CoinQuantityDTO> coinQuantities = transactionRepository.findCoinQuantitiesGroupedByPortfolio(portfolioId);
+        return ResponseEntity.status(HttpStatus.OK).body(coinQuantities);
+    }
 
     private boolean userHasNoAccessToTransaction(Long transactionId, Long portfolioId) {
         return !(portfolioRepository.existsByUserIdAndId(userService.getAuthenticatedUser().getId(), portfolioId)
@@ -131,6 +151,6 @@ public class TransactionServiceImpl implements TransactionService {
 
     private TransactionDTO transactionToDTO(Transaction t) {
         return new TransactionDTO(t.getId(), t.getCoinName(), t.getQuantity(),
-                t.getPricePerUnit(), t.getTransactionDate(), t.getFee(), t.getNote());
+                t.getPricePerUnit(), t.getTransactionDate(), t.getFee(), t.getNote(), t.getTransactionType());
     }
 }

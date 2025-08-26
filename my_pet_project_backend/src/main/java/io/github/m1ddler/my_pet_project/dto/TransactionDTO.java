@@ -14,7 +14,7 @@ public class TransactionDTO {
     @Positive(message = "Quantity of coins must be positive")
     private BigDecimal quantity;
     @NotNull(message = "Price per one coin cannot be empty")
-    @Positive(message = "Price per one coin must be positive")
+    @Min(value = 0, message = "Price per one coin cannot be lower 0")
     private BigDecimal pricePerUnit;
     @NotNull(message = "Transaction date cannot be empty")
     private LocalDateTime transactionDate;
@@ -22,9 +22,11 @@ public class TransactionDTO {
     @NotNull(message = "Fee cannot be empty")
     private BigDecimal fee;
     private String note;
+    @NotNull(message = "Transaction type cannot be empty")
+    private String transactionType;
 
     public TransactionDTO(long id, String coinName, BigDecimal quantity, BigDecimal pricePerUnit,
-                          LocalDateTime transactionDate, BigDecimal fee, String note) {
+                          LocalDateTime transactionDate, BigDecimal fee, String note, String transactionType) {
         this.id = id;
         this.coinName = coinName;
         this.quantity = quantity;
@@ -32,6 +34,7 @@ public class TransactionDTO {
         this.transactionDate = transactionDate;
         this.fee = fee;
         this.note = note;
+        this.transactionType = transactionType;
     }
 
     public long getId() {
@@ -89,4 +92,13 @@ public class TransactionDTO {
     public void setNote(String note) {
         this.note = note;
     }
+
+    public String getTransactionType() {
+        return transactionType;
+    }
+
+    public void setTransactionType(String transactionType) {
+        this.transactionType = transactionType;
+    }
+
 }

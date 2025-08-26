@@ -7,7 +7,8 @@ import Navbar from "@/components/Navbar";
 import LoadingSpinner from "@/components/LoadingSpinner";
 import DountChart from "@/components/DoughnutChart";
 import LineChart from "@/components/LineChart";
-import TransactionsTable from "@/components/AssetsTable";
+import AssetsTable from "@/components/AssetsTable";
+import TransactionsTable from "@/components/TransactionsTable";
 import CreatePortfolioForm from "@/components/Sidebar/CreatePortfolioForm";
 import DeletePortfolioForm from "@/components/Sidebar/DeletePortfolioItem";
 import EditPortfolioForm from "@/components/Sidebar/EditPortfolioForm"
@@ -97,19 +98,19 @@ export default function UserPage() {
               </div>
 
               {selectedPortfolio?.id && (
-              <div className="px-3">
-                <button className="rounded-lg bg-blue-600 px-4 py-2 font-medium text-sm text-white shadow-md transition duration-200 hover:bg-blue-700 hover:brightness-120 active:scale-95"
-                  type="button"
-                  onClick={() => {setCreateTransactionFormOpen(true)}}>
-                  Add Transaction
-                </button>
-              </div>
+                <div className="px-3">
+                  <button className="rounded-lg bg-blue-600 px-4 py-2 font-medium text-sm text-white shadow-md transition duration-200 hover:bg-blue-700 hover:brightness-120 active:scale-95"
+                    type="button"
+                    onClick={() => { setCreateTransactionFormOpen(true) }}>
+                    Add Transaction
+                  </button>
+                </div>
               )
-            }
+              }
 
             </div>
             <div className="my-3 ml-auto hidden sm:flex">
-              <DountChart portfolio={selectedPortfolio}/>
+              <DountChart portfolio={selectedPortfolio} />
             </div>
           </div>
           <div>
@@ -131,26 +132,26 @@ export default function UserPage() {
               })}
             </ul>
 
-            <div className="">
+            <div className="mb-2">
               {activeTab === "overview" && (
-                <div>
-                  <h4 className="font-semibold text-base text-slate-900">Overview</h4>
+                <div className="mt-4">
                   <div className="text-slate-600 text-sm leading-relaxed">
                     <div className="mb-4">
                       <LineChart />
                     </div>
                     <div>
-                      <TransactionsTable />
+                      <AssetsTable />
                     </div>
                   </div>
                 </div>
               )}
               {activeTab === "transactions" && (
-                <div>
-                  <h4 className="font-semibold text-base text-slate-900">Transactions</h4>
-                  <p className="mt-2 text-slate-600 text-sm leading-relaxed">
-                    Transactions.
-                  </p>
+                <div className="mt-4">
+                  <div className="text-slate-600 text-sm leading-relaxed">
+                    {selectedPortfolio && (
+                      <TransactionsTable portfolioId={selectedPortfolio.id} />
+                    )}
+                  </div>
                 </div>
               )}
             </div>
@@ -207,7 +208,7 @@ export default function UserPage() {
             setToastType("success")
             setShowToast(true);
           }}
-          onError={(message : string) => {
+          onError={(message: string) => {
             setToastMessage("Error");
             setToastDescription(message)
             setToastType("error")

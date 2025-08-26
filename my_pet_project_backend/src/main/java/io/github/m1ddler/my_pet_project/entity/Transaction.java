@@ -25,6 +25,8 @@ public class Transaction {
     private BigDecimal fee;
     @Column(name = "note")
     private String note;
+    @Column(name = "transaction_type")
+    private String transactionType;
     @ManyToOne
     @JoinColumn(name = "portfolio_id")
     private Portfolio portfolio;
@@ -33,7 +35,7 @@ public class Transaction {
 
     public Transaction(String coinName, BigDecimal quantity,
                        BigDecimal pricePerUnit, LocalDateTime transactionDate, BigDecimal fee,
-                       String note, Portfolio portfolio) {
+                       String note, Portfolio portfolio, String transactionType) {
         this.coinName = coinName;
         this.quantity = quantity;
         this.pricePerUnit = pricePerUnit;
@@ -41,6 +43,7 @@ public class Transaction {
         this.fee = fee;
         this.note = note;
         this.portfolio = portfolio;
+        this.transactionType = transactionType;
     }
 
     public Portfolio getPortfolio() {
@@ -105,6 +108,14 @@ public class Transaction {
 
     public void setNote(String note) {
         this.note = note;
+    }
+
+    public String getTransactionType() {
+        return transactionType;
+    }
+
+    public void setTransactionType(String transactionType) {
+        this.transactionType = transactionType;
     }
 
     @Override

@@ -17,7 +17,8 @@ export default function FeeTransactionForm({
     const [fee, setFee] = useState(initialFee);
 
     const handleSave = () => {
-        onSave(fee.trim());
+        const sanitizedFee = fee.trim() === "" ? "0" : fee.trim();
+        onSave(sanitizedFee);
         onClose();
     };
 
@@ -66,7 +67,7 @@ export default function FeeTransactionForm({
                 >
                     Save Fee
                 </button>
-                
+
             </div>
         </div>
     );

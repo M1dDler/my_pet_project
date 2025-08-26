@@ -75,6 +75,7 @@ export default function CreateTransactionForm({
             }
 
             let payload = { ...form };
+
             if (form.transactionType === "Transfer") {
                 if (form.transferType === undefined) {
                     onError?.("Transfer type error");
@@ -86,7 +87,6 @@ export default function CreateTransactionForm({
                 };
                 delete payload.transferType;
             }
-
             const newTransaction = createTransaction(portfolio.id, payload, session.accessToken);
 
             if (!newTransaction) {

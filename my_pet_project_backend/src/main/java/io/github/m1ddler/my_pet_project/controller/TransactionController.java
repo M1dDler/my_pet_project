@@ -1,9 +1,12 @@
 package io.github.m1ddler.my_pet_project.controller;
 
+import io.github.m1ddler.my_pet_project.dto.CoinQuantityDTO;
+import io.github.m1ddler.my_pet_project.dto.PagedResponseDTO;
 import io.github.m1ddler.my_pet_project.dto.TransactionDTO;
 import io.github.m1ddler.my_pet_project.service.interfaces.TransactionService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -21,8 +24,19 @@ public class TransactionController {
 
 
     @GetMapping("/{portfolioId}/transactions")
-    public ResponseEntity<List<TransactionDTO>> getCurrentUserTransactions(@PathVariable Long portfolioId) {
-        return transactionService.getCurrentUserTransactionsByPortfolioId(portfolioId);
+    public ResponseEntity<PagedResponseDTO<TransactionDTO>> getCurrentUserTransactions(@PathVariable Long portfolioId,
+                                                                                       @RequestParam(defaultValue = "1") int page,
+                                                                                       @RequestParam(defaultValue = "5") int size,
+                                                                                       @RequestParam(required = false) String transactionType,
+                                                                                       @RequestParam(required = false) String coinName
+                                                                                      ) {
+
+        return transactionService.getCurrentUserTransactionsByPortfolioId(portfolioId, page - 1, size, transactionType, coinName);
+    }
+
+    @GetMapping("/{portfolioId}/transactions/coins")
+    public ResponseEntity<List <CoinQuantityDTO>> getCurrentUserCoinsFromTransactions(@PathVariable Long portfolioId) {
+        return transactionService.getCurrentUserCoinsQuantitiesFromTransactions(portfolioId);
     }
 
     @GetMapping("/{portfolioId}/transactions/{id}")
