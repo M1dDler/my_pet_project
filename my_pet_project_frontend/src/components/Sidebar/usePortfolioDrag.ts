@@ -1,6 +1,6 @@
 import type { DragEndEvent } from "@dnd-kit/core";
 import { arrayMove } from "@dnd-kit/sortable";
-import type { Portfolio } from "./types";
+import type { Portfolio } from "types/types";
 
 export default function handleDragEnd(
   event: DragEndEvent,

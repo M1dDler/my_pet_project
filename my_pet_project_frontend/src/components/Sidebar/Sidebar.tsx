@@ -8,7 +8,7 @@ import { SortableContext, verticalListSortingStrategy } from "@dnd-kit/sortable"
 import LoadingSpinner from "../LoadingSpinner";
 import SortablePortfolioItem from "./SortablePortfolioItem";
 import handleDragEnd from "./usePortfolioDrag";
-import type { Portfolio } from "./types";
+import type { Portfolio } from "types/types";
 
 interface SidebarProps {
   onSelectPortfolio: (portfolio: Portfolio | null) => void;

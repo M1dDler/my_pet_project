@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import ky from "ky";
 import { useRouter } from "next/navigation";
 import { getSession } from "next-auth/react";
-import type { Portfolio } from "./types";
+import type { Portfolio } from "types/types";
 
 export function usePortfolios() {
   const [portfolios, setPortfolios] = useState<Portfolio[]>([]);

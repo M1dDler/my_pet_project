@@ -6,7 +6,7 @@ import {
     type UseSortableArguments,
 } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
-import type { Portfolio } from "./types";
+import type { Portfolio } from "types/types";
 
 interface SortablePortfolioItemProps {
     portfolio: Portfolio;

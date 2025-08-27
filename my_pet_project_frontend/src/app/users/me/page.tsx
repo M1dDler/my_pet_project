@@ -16,6 +16,7 @@ import CreateTransactionForm from "@/components/Dashboard/AddTransactionButtonFo
 import { usePortfolios } from "@/components/Sidebar/usePortfolios";
 import type { Portfolio, Transaction } from "types/types";
 import type { ToastType } from "types/types";
+import { mutate } from "swr";
 
 const tabs = [
   { id: "overview", label: "Overview" },
@@ -110,7 +111,9 @@ export default function UserPage() {
 
             </div>
             <div className="my-3 ml-auto hidden sm:flex">
-              <DountChart portfolio={selectedPortfolio} />
+              {selectedPortfolio && (
+              <DountChart portfolioId={selectedPortfolio.id} />
+              )}
             </div>
           </div>
           <div>
@@ -207,6 +210,7 @@ export default function UserPage() {
             setToastDescription("Transaction created successfully");
             setToastType("success")
             setShowToast(true);
+            mutate(["doughnutChart", selectedPortfolio.id])
           }}
           onError={(message: string) => {
             setToastMessage("Error");

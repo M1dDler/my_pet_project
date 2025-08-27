@@ -1,12 +1,11 @@
 "use client";
 
-import { useEffect, useState } from "react";
 import { Doughnut } from "react-chartjs-2";
+import useSWR from "swr";
 import { Chart as ChartJS, ArcElement, Tooltip, Legend } from "chart.js";
 import type { ChartOptions } from "chart.js";
-import type { Portfolio, CoinQuantity, Transaction } from "types/types";
-import { getListOfCoinsQuantitiesFromTransactions } from "@/app/api/transactions";
-import { getSession } from "next-auth/react";
+import type { Transaction, CoinQuantity } from "types/types";
+import { fetchDoughnutChartData } from "@/app/api/swr";
 
 ChartJS.register(ArcElement, Tooltip, Legend);
 
@@ -30,35 +29,22 @@ function generateColors(num: number) {
 }
 
 interface DoughnutChartProps {
-  portfolio: Portfolio | null;
+  portfolioId: number;
 }
 
-export default function DoughnutChart({ portfolio }: DoughnutChartProps) {
-  const [labels, setLabels] = useState<string[]>([]);
-  const [quantities, setQuantities] = useState<number[]>([]);
+export default function DoughnutChart({ portfolioId }: DoughnutChartProps) {
+  const { data: transactions = [], error } = useSWR(
+    ["doughnutChart", portfolioId],
+    fetchDoughnutChartData
+  );
 
-  useEffect(() => {
-    async function fetchData() {
-      const session = await getSession();
-      if (!(session?.accessToken && portfolio)) return;
+  const listOfCoinsQuantities: CoinQuantity[] = transactions.map((t: Transaction) => ({
+    coinName: t.coinName,
+    quantity: Number(t.quantity),
+  }));
 
-      const transactions: Transaction[] = await getListOfCoinsQuantitiesFromTransactions(
-        portfolio.id,
-        session.accessToken
-      );
-
-      const listOfCoinsQuantities: CoinQuantity[] = transactions.map((t) => ({
-        coinName: t.coinName,
-        quantity: Number(t.quantity),
-      }));
-
-      setLabels(listOfCoinsQuantities.map((item) => item.coinName));
-      setQuantities(listOfCoinsQuantities.map((item) => item.quantity));
-    }
-
-    fetchData();
-  }, [portfolio]);
-
+  const labels = listOfCoinsQuantities.map((item) => item.coinName);
+  const quantities = listOfCoinsQuantities.map((item) => item.quantity);
   const colors = generateColors(labels.length);
 
   const data = {
@@ -75,7 +61,7 @@ export default function DoughnutChart({ portfolio }: DoughnutChartProps) {
 
   return (
     <div className="mx-auto h-45 w-full">
-      <Doughnut data={data} options={options} />
+      {error ? <div>Error loading chart</div> : <Doughnut data={data} options={options} />}
     </div>
   );
 }
