@@ -4,6 +4,7 @@ import io.github.m1ddler.my_pet_project.dao.PortfolioRepository;
 import io.github.m1ddler.my_pet_project.dao.TransactionRepository;
 import io.github.m1ddler.my_pet_project.dto.CoinQuantityDTO;
 import io.github.m1ddler.my_pet_project.dto.PagedResponseDTO;
+import io.github.m1ddler.my_pet_project.dto.PortfolioAggregatesDTO;
 import io.github.m1ddler.my_pet_project.dto.TransactionDTO;
 import io.github.m1ddler.my_pet_project.entity.Portfolio;
 import io.github.m1ddler.my_pet_project.entity.Transaction;
@@ -43,6 +44,7 @@ public class TransactionServiceImpl implements TransactionService {
     @Override
     public ResponseEntity<PagedResponseDTO<TransactionDTO>> getCurrentUserTransactionsByPortfolioId(Long portfolioId,
                                                                              int page, int size, String transactionType, String coinName) {
+        calculateProfitLoss(BigDecimal.valueOf(112708.29), portfolioId);
         Portfolio portfolio = portfolioRepository
                 .findByUserIdAndId(userService.getAuthenticatedUser().getId(), portfolioId)
                 .orElse(null);
@@ -142,6 +144,16 @@ public class TransactionServiceImpl implements TransactionService {
         }
         List<CoinQuantityDTO> coinQuantities = transactionRepository.findCoinQuantitiesGroupedByPortfolio(portfolioId);
         return ResponseEntity.status(HttpStatus.OK).body(coinQuantities);
+    }
+
+    private BigDecimal calculateProfitLoss (BigDecimal currentPrice, Long portfolioId) {
+        PortfolioAggregatesDTO aggregates = transactionRepository.findPortfolioAggregates(portfolioId);
+        BigDecimal profit = (aggregates.getBuyAmount().add(aggregates.getTransferAmount())).multiply(currentPrice.subtract(aggregates.getAvgBuy()));
+        System.out.println("Profit: " + profit);
+        BigDecimal loss = aggregates.getSellAmount().multiply(currentPrice.subtract(aggregates.getAvgSell()));
+        System.out.println("Loss: " + loss);
+        System.out.println("ProfitLoss: " + profit.add(loss));
+        return profit.add(loss);
     }
 
     private boolean userHasNoAccessToTransaction(Long transactionId, Long portfolioId) {
