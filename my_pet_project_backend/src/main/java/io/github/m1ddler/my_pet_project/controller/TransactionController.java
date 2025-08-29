@@ -1,15 +1,15 @@
 package io.github.m1ddler.my_pet_project.controller;
 
-import io.github.m1ddler.my_pet_project.dto.CoinQuantityDTO;
+import io.github.m1ddler.my_pet_project.dto.CoinSummaryDTO;
 import io.github.m1ddler.my_pet_project.dto.PagedResponseDTO;
 import io.github.m1ddler.my_pet_project.dto.TransactionDTO;
 import io.github.m1ddler.my_pet_project.service.interfaces.TransactionService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.math.BigDecimal;
 import java.util.List;
 
 @RestController
@@ -34,9 +34,9 @@ public class TransactionController {
         return transactionService.getCurrentUserTransactionsByPortfolioId(portfolioId, page - 1, size, transactionType, coinName);
     }
 
-    @GetMapping("/{portfolioId}/transactions/coins")
-    public ResponseEntity<List <CoinQuantityDTO>> getCurrentUserCoinsFromTransactions(@PathVariable Long portfolioId) {
-        return transactionService.getCurrentUserCoinsQuantitiesFromTransactions(portfolioId);
+    @GetMapping("/{portfolioId}/transactions/summary")
+    public ResponseEntity<List<CoinSummaryDTO>> getCurrentUserTransactionsByPortfolioId(@PathVariable Long portfolioId) {
+        return transactionService.getCoinsSummaries(BigDecimal.valueOf(109902.85), portfolioId);
     }
 
     @GetMapping("/{portfolioId}/transactions/{id}")

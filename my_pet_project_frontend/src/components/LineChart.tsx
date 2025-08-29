@@ -158,8 +158,6 @@ export default function ProfitLineChart() {
                     <Line data={data} options={options} />
                 </div>
             </div>
-
-            <div className="mt-6 border-gray-700 border-t" />
         </div>
     );
 }

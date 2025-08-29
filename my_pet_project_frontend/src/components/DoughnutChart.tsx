@@ -1,11 +1,9 @@
 "use client";
 
 import { Doughnut } from "react-chartjs-2";
-import useSWR from "swr";
 import { Chart as ChartJS, ArcElement, Tooltip, Legend } from "chart.js";
 import type { ChartOptions } from "chart.js";
-import type { Transaction, CoinQuantity } from "types/types";
-import { fetchDoughnutChartData } from "@/app/api/swr";
+import type { CoinSummary } from "types/types";
 
 ChartJS.register(ArcElement, Tooltip, Legend);
 
@@ -29,18 +27,14 @@ function generateColors(num: number) {
 }
 
 interface DoughnutChartProps {
-  portfolioId: number;
+  coinsSummaries: CoinSummary []; 
 }
 
-export default function DoughnutChart({ portfolioId }: DoughnutChartProps) {
-  const { data: transactions = [], error } = useSWR(
-    ["doughnutChart", portfolioId],
-    fetchDoughnutChartData
-  );
+export default function DoughnutChart({ coinsSummaries }: DoughnutChartProps) {
 
-  const listOfCoinsQuantities: CoinQuantity[] = transactions.map((t: Transaction) => ({
-    coinName: t.coinName,
-    quantity: Number(t.quantity),
+  const listOfCoinsQuantities = coinsSummaries.map((coin) => ({
+    coinName: coin.coinName,
+    quantity: Number(coin.quantity),
   }));
 
   const labels = listOfCoinsQuantities.map((item) => item.coinName);
@@ -61,7 +55,7 @@ export default function DoughnutChart({ portfolioId }: DoughnutChartProps) {
 
   return (
     <div className="mx-auto h-45 w-full">
-      {error ? <div>Error loading chart</div> : <Doughnut data={data} options={options} />}
+      {coinsSummaries ? <Doughnut data={data} options={options}/> : <div>Error loading chart</div>}
     </div>
   );
 }

@@ -2,12 +2,13 @@ package io.github.m1ddler.my_pet_project.service.impl;
 
 import io.github.m1ddler.my_pet_project.dao.PortfolioRepository;
 import io.github.m1ddler.my_pet_project.dao.TransactionRepository;
-import io.github.m1ddler.my_pet_project.dto.CoinQuantityDTO;
+import io.github.m1ddler.my_pet_project.dto.CoinSummaryDTO;
 import io.github.m1ddler.my_pet_project.dto.PagedResponseDTO;
-import io.github.m1ddler.my_pet_project.dto.PortfolioAggregatesDTO;
+import io.github.m1ddler.my_pet_project.dto.CoinAggregatesDTO;
 import io.github.m1ddler.my_pet_project.dto.TransactionDTO;
 import io.github.m1ddler.my_pet_project.entity.Portfolio;
 import io.github.m1ddler.my_pet_project.entity.Transaction;
+import io.github.m1ddler.my_pet_project.service.interfaces.CryptoDataService;
 import io.github.m1ddler.my_pet_project.service.interfaces.TransactionService;
 import io.github.m1ddler.my_pet_project.service.interfaces.UserService;
 import jakarta.transaction.Transactional;
@@ -19,9 +20,10 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
-import java.util.stream.Collectors;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -30,13 +32,15 @@ public class TransactionServiceImpl implements TransactionService {
     private final UserService userService;
     private final TransactionRepository transactionRepository;
     private final PortfolioRepository portfolioRepository;
+    private final CryptoDataService cryptoDataService;
 
     @Autowired
     public TransactionServiceImpl(UserService userService, TransactionRepository transactionRepository,
-                                  PortfolioRepository portfolioRepository) {
+                                  PortfolioRepository portfolioRepository, CryptoDataService cryptoDataService) {
         this.userService = userService;
         this.transactionRepository = transactionRepository;
         this.portfolioRepository = portfolioRepository;
+        this.cryptoDataService = cryptoDataService;
     }
 
     Logger log = LoggerFactory.getLogger(getClass());
@@ -44,7 +48,6 @@ public class TransactionServiceImpl implements TransactionService {
     @Override
     public ResponseEntity<PagedResponseDTO<TransactionDTO>> getCurrentUserTransactionsByPortfolioId(Long portfolioId,
                                                                              int page, int size, String transactionType, String coinName) {
-        calculateProfitLoss(BigDecimal.valueOf(112708.29), portfolioId);
         Portfolio portfolio = portfolioRepository
                 .findByUserIdAndId(userService.getAuthenticatedUser().getId(), portfolioId)
                 .orElse(null);
@@ -138,22 +141,34 @@ public class TransactionServiceImpl implements TransactionService {
     }
 
     @Override
-    public ResponseEntity<List <CoinQuantityDTO>> getCurrentUserCoinsQuantitiesFromTransactions(Long portfolioId) {
-        if (!portfolioRepository.existsByUserIdAndId(userService.getAuthenticatedUser().getId(), portfolioId)){
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
-        }
-        List<CoinQuantityDTO> coinQuantities = transactionRepository.findCoinQuantitiesGroupedByPortfolio(portfolioId);
-        return ResponseEntity.status(HttpStatus.OK).body(coinQuantities);
-    }
+    public ResponseEntity<List<CoinSummaryDTO>> getCoinsSummaries (BigDecimal currentPrice, Long portfolioId) {
+        // USER ACCESS REQUIRED IMPLEMENTATION
+        System.out.println("BTC price: " + cryptoDataService.getCoinPrice("bitcoin", "usd"));
+//        System.out.println(cryptoDataService.getCryptoCoins());
 
-    private BigDecimal calculateProfitLoss (BigDecimal currentPrice, Long portfolioId) {
-        PortfolioAggregatesDTO aggregates = transactionRepository.findPortfolioAggregates(portfolioId);
-        BigDecimal profit = (aggregates.getBuyAmount().add(aggregates.getTransferAmount())).multiply(currentPrice.subtract(aggregates.getAvgBuy()));
-        System.out.println("Profit: " + profit);
-        BigDecimal loss = aggregates.getSellAmount().multiply(currentPrice.subtract(aggregates.getAvgSell()));
-        System.out.println("Loss: " + loss);
-        System.out.println("ProfitLoss: " + profit.add(loss));
-        return profit.add(loss);
+        List<CoinAggregatesDTO> coinsAggregates = transactionRepository.findPortfolioCoinAggregates(portfolioId);
+        List<CoinSummaryDTO> coinsSummaries = new ArrayList<>();
+
+        for (CoinAggregatesDTO coinAggregates : coinsAggregates) {
+
+            BigDecimal profit = (coinAggregates.getBuyAmount().add(coinAggregates.getTransferAmount()))
+                    .multiply(currentPrice.subtract(coinAggregates.getAvgBuy()));
+
+            BigDecimal loss = coinAggregates.getSellAmount().multiply(currentPrice.subtract(coinAggregates.getAvgSell()));
+
+            CoinSummaryDTO coinSummary = new CoinSummaryDTO(
+                    coinAggregates.getCoinName(),
+                    currentPrice,
+                    1,
+                    1,
+                    1, // Need to calculate in future
+                    coinAggregates.getQuantity(),
+                    coinAggregates.getAvgBuy(),
+                    profit.add(loss)
+            );
+            coinsSummaries.add(coinSummary);
+        }
+        return ResponseEntity.status(HttpStatus.OK).body(coinsSummaries);
     }
 
     private boolean userHasNoAccessToTransaction(Long transactionId, Long portfolioId) {

@@ -2,19 +2,32 @@ package io.github.m1ddler.my_pet_project.dto;
 
 import java.math.BigDecimal;
 
-public class PortfolioAggregatesDTO {
+public class CoinAggregatesDTO {
+    private String coinName;
     private BigDecimal transferAmount;
     private BigDecimal buyAmount;
     private BigDecimal avgBuy;
     private BigDecimal sellAmount;
     private BigDecimal avgSell;
+    private BigDecimal quantity;
 
-    public PortfolioAggregatesDTO(BigDecimal transferAmount, BigDecimal buyAmount, BigDecimal avgBuy, BigDecimal sellAmount, BigDecimal avgSell) {
+    public CoinAggregatesDTO(String coinName, BigDecimal transferAmount, BigDecimal buyAmount, BigDecimal avgBuy,
+                             BigDecimal sellAmount, BigDecimal avgSell, BigDecimal quantity) {
+        this.coinName = coinName;
         this.transferAmount = transferAmount;
         this.buyAmount = buyAmount;
         this.avgBuy = avgBuy;
         this.sellAmount = sellAmount;
         this.avgSell = avgSell;
+        this.quantity = quantity;
+    }
+
+    public String getCoinName() {
+        return coinName;
+    }
+
+    public void setCoinName(String coinName) {
+        this.coinName = coinName;
     }
 
     public BigDecimal getTransferAmount() {
@@ -55,5 +68,24 @@ public class PortfolioAggregatesDTO {
 
     public void setAvgSell(BigDecimal avgSell) {
         this.avgSell = avgSell;
+    }
+
+    public BigDecimal getQuantity() {
+        return quantity;
+    }
+
+    public void setQuantity(BigDecimal quantity) {
+        this.quantity = quantity;
+    }
+
+    @Override
+    public String toString() {
+        return "coinName: " + coinName + "\n"
+                + "transferAmount: " + transferAmount + "\n"
+                + "buyAmount: " + buyAmount + "\n"
+                + "sellAmount: " + sellAmount + "\n"
+                + "avgBuy: " + avgBuy + "\n"
+                + "avgSell: " + avgSell + "\n"
+                + "quantity: " + quantity;
     }
 }

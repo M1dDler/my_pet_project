@@ -1,5 +1,5 @@
 import ky from "ky";
-import type { Transaction } from "types/types";
+import type { CoinSummary, Transaction } from "types/types";
 
 export async function createTransaction(portfolioId: number, transaction: Partial<Transaction>, token: string) {
   return await ky.post(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/v1/users/me/portfolios/${portfolioId}/transactions`, {
@@ -11,10 +11,10 @@ export async function createTransaction(portfolioId: number, transaction: Partia
   }).json<Transaction>();
 }
 
-export async function getListOfCoinsQuantitiesFromTransactions(portfolioId: number, token: string) {
-  return await ky.get(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/v1/users/me/portfolios/${portfolioId}/transactions/coins`, {
+export async function getCoinsSummaries(portfolioId: number, token: string) {
+  return await ky.get(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/v1/users/me/portfolios/${portfolioId}/transactions/summary`, {
     headers: {
       Authorization: `Bearer ${token}`,
     },
-  }).json<Transaction[]>();
+  }).json<CoinSummary[]>();
 }

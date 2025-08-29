@@ -14,9 +14,10 @@ import DeletePortfolioForm from "@/components/Sidebar/DeletePortfolioItem";
 import EditPortfolioForm from "@/components/Sidebar/EditPortfolioForm"
 import CreateTransactionForm from "@/components/Dashboard/AddTransactionButtonForms/CreateTransactionForm";
 import { usePortfolios } from "@/components/Sidebar/usePortfolios";
-import type { Portfolio, Transaction } from "types/types";
+import type { CoinSummary, Portfolio, Transaction } from "types/types";
 import type { ToastType } from "types/types";
-import { mutate } from "swr";
+import useSWR, { mutate } from "swr";
+import { fetchCoinsSummarytData } from "@/app/api/swr";
 
 const tabs = [
   { id: "overview", label: "Overview" },
@@ -53,6 +54,18 @@ export default function UserPage() {
     loading,
     saveOrder,
   } = usePortfolios();
+
+
+  const { data: coinsSummaries = [], error } = useSWR<CoinSummary[]>(
+  selectedPortfolio ? ["doughnutChart", selectedPortfolio.id] : null,
+  fetchCoinsSummarytData
+);
+  if (error) {
+    setToastMessage("Error");
+    setToastDescription("Coins Summaries failed to load")
+    setToastType("error")
+    setShowToast(true)
+  }
 
   if (loading || status === "loading") return <LoadingSpinner />;
 
@@ -111,8 +124,8 @@ export default function UserPage() {
 
             </div>
             <div className="my-3 ml-auto hidden sm:flex">
-              {selectedPortfolio && (
-              <DountChart portfolioId={selectedPortfolio.id} />
+              {coinsSummaries && (
+                <DountChart coinsSummaries={coinsSummaries} />
               )}
             </div>
           </div>
@@ -143,7 +156,7 @@ export default function UserPage() {
                       <LineChart />
                     </div>
                     <div>
-                      <AssetsTable />
+                      <AssetsTable coinsSummaries={coinsSummaries} />
                     </div>
                   </div>
                 </div>

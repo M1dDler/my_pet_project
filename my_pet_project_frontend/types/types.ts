@@ -20,7 +20,13 @@ export interface Transaction {
   note: string;
 }
 
-export interface CoinQuantity {
-  coinName: string;
-  quantity: number;
+export interface CoinSummary {
+    coinName: string;
+    currentPricePerUnit: string;
+    profitChangePercentage1h: number;
+    profitChangePercentage24h: number;
+    profitChangePercentage7d: number;
+    quantity: string;
+    avgBuy: string;
+    profitLoss: string;
 }
